@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasources>
+    <datasource jndi-name="railway_oracle" >
+        <connection-url>jdbc:oracle:thin:@localhost:1521:railwaydb</connection-url>
+        <driver>ojdbc-1.4.jar</driver>
+        <driver-class>oracle.jdbc.OracleDriver</driver-class>
+        <pool>
+            <max-pool-size>30</max-pool-size>
+        </pool>
+        <security>
+            <user-name>SYSTEM</user-name>
+            <password>1211</password>
+        </security>
+    </datasource>
+    <datasource jndi-name="java:jboss/railwaymysql" >
+        <connection-url>jdbc:mysql://127.0.0.1:3306/railway</connection-url>
+        <driver>mysql-connector-java-8.0.11.jar</driver>
+        <driver-class>com.mysql.jdbc.Driver</driver-class>
+        <pool>
+            <max-pool-size>30</max-pool-size>
+        </pool>
+        <security>
+            <user-name>root</user-name>
+            <password>1211</password>
+        </security>
+    </datasource>
+</datasources>
