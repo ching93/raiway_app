@@ -5,6 +5,8 @@
  */
 package kiri.mavenproject1.entities;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
@@ -23,22 +25,35 @@ public class Schedule {
     private int id;
     @ManyToOne
     private Route route = new Route();
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name="departureTime")
-    private Date departureTime;
+    private LocalDateTime departureTime;
     @Column(name="delay")
-    private int delay;
+    private Duration delay;
+    @Column(name="pricePerKm")
+    private float pricePerKm;
     public Schedule() {
         
+    }
+    public Schedule(Route route, LocalDateTime depTime, float pricePerKm) {
+        this.route = route;
+        this.departureTime = depTime;
+        this.pricePerKm = pricePerKm;
+        this.delay = Duration.ZERO;
     }
     public void setId(int id) {
         this.id = id;
     }
-    public void setDelay(int delay) {
+    public void setDelay(Duration delay) {
         this.delay = delay;
+    }
+    public void setPricePerKm(float pricePerKm) {
+        this.pricePerKm = pricePerKm;
     }
     public void setRoute(Route  route) {
         this.route = route;
+    }
+    public void setDepartureTime(LocalDateTime date) {
+        this.departureTime = date;
     }
     public Route getRoute() {
         return route;
@@ -46,10 +61,13 @@ public class Schedule {
     public int getId() {
         return this.id;
     }
-    public Date getDepartureTime() {
+    public LocalDateTime getDepartureTime() {
         return departureTime;
     }
-    public int getDelay() {
+    public Duration getDelay() {
         return this.delay;
+    }
+    public float getPricePerKm() {
+        return pricePerKm;
     }
 }

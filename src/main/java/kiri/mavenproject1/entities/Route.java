@@ -6,6 +6,7 @@
 package kiri.mavenproject1.entities;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 /**
  *
@@ -18,21 +19,29 @@ public class Route {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name="id")
     private int id;
-    @Column(name="price")
-    private float price;
+    @NotNull
+    @ManyToOne(cascade=CascadeType.REMOVE)
+    private Train train = new Train();
     public Route() {
         
+    }
+    public Route(Train train) {
+        this.train = train;
     }
     public void setId(int id) {
         this.id = id;
     }
-    public void setPrice(float price) {
-        this.price = price;
+    public void setTrain(Train train) {
+        this.train = train;
     }
     public int getId() {
         return this.id;
     }
-    public float getPrice() {
-        return this.price;
+    public Train getTrain() {
+        return this.train;
+    }
+    @Override
+    public String toString() {
+        return "Маршрут #"+id+" Поезд #"+train.getId();
     }
 }

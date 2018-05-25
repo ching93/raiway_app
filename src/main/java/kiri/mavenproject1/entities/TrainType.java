@@ -13,7 +13,7 @@ import javax.validation.constraints.*;
  * @author User
  */
 @Entity
-@Table(name="TrainTypes")
+@Table(name="TrainTypes",uniqueConstraints=@UniqueConstraint(columnNames="name"))
 public class TrainType {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -22,6 +22,9 @@ public class TrainType {
     @NotNull
     @Column(name="name")
     private String name;
+    @NotNull
+    @Column(name="priceCoeff")
+    private float priceCoeff = 1;
     public TrainType() {
         
     }
@@ -34,10 +37,20 @@ public class TrainType {
     public void setName(String name) {
         this.name = name;
     }
+    public void setPriceCoeff(float priceCoeff) {
+        this.priceCoeff = priceCoeff;
+    }
     public int getId() {
         return this.id;
     }
     public String getName() {
         return this.name;
+    }
+    public float getPriceCoeff() {
+        return this.priceCoeff;
+    }
+    @Override
+    public String toString() {
+        return getName();
     }
 }

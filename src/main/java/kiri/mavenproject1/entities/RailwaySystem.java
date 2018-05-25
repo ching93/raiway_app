@@ -22,6 +22,7 @@ public class RailwaySystem {
     @Column(name="id")
     private int id;
     @NotNull
+    @Min(value=1)
     @Column(name="distance")
     private float distance;
     @ManyToOne
@@ -31,6 +32,13 @@ public class RailwaySystem {
     public RailwaySystem() {
 
     }
+    public RailwaySystem(Station in, Station out, float dist) {
+        if (out==in)
+            throw new IllegalArgumentException("In station can't be equal out station");
+        this.in_station = in;
+        this.out_station = out;
+        this.distance = dist;
+    }
     public void setDistance(float distance) {
         this.distance = distance;
     }
@@ -38,15 +46,19 @@ public class RailwaySystem {
         return this.distance;
     }
     public void setOutStation(Station out) {
+        if (in_station!=null && out==in_station)
+            throw new IllegalArgumentException("In station can't be equal out station");
         this.out_station = out;
     }
     public Station getOutStation() {
         return this.out_station;
     }
-    public void setInStations(Station in) {
+    public void setInStation(Station in) {
+        if (out_station!=null && in==out_station)
+            throw new IllegalArgumentException("In station can't be equal out station");
         this.in_station = in;
     }
-    public Station getInStations() {
+    public Station getInStation() {
         return this.in_station;
     }
 }

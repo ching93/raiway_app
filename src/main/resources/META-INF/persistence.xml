@@ -4,20 +4,24 @@
     <provider>org.hibernate.ejb.HibernatePersistence</provider>
     <!--<jta-data-source>java:jboss/railwaymysql</jta-data-source>-->
     <class>kiri.mavenproject1.entities.RailwaySystem</class>
-    <class>kiri.mavenproject1.entities.Route</class>
     <class>kiri.mavenproject1.entities.RouteStation</class>
     <class>kiri.mavenproject1.entities.Station</class>
     <class>kiri.mavenproject1.entities.Train</class>
     <class>kiri.mavenproject1.entities.TrainType</class>
+    <class>kiri.mavenproject1.entities.Schedule</class>
+    <class>kiri.mavenproject1.entities.Route</class>
     <properties>
-      <property name="hibernate.hbm2dll.auto" value="update"/>
-      <property name="javax.persistence.jdbc.driver_class" value="com.mysql.jdbc.Driver" />
-      <property name="javax.persistence.jdbc.url" value="jdbc:mysql://127.0.0.1:3306/railway?serverTimezone=UTC" />
-      <!--<property name="javax.persistence.schema-generation.database.action" value="create"/>-->
-      <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect"/>
-      <property name="javax.persistence.jdbc.user" value="root" />
-      <property name="javax.persistence.jdbc.password" value="1211" />
-      
+      <property name="hibernate.hbm2dll.auto" value="create"/>
+      <!--<property name="javax.persistence.jdbc.driver_class" value="com.mysql.jdbc.Driver"/>-->
+      <property name="javax.persistence.jdbc.driver_class" value="oracle.jdbc.OracleDriver"/>
+      <!--<property name="javax.persistence.jdbc.url" value="jdbc:mysql://127.0.0.1:3306/railway?serverTimezone=UTC"/>-->
+      <property name="javax.persistence.jdbc.url" value="jdbc:oracle:thin:@localhost:1521:xe"/>
+      <!--<property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>-->
+      <!--<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect"/>-->
+      <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect"/>
+      <property name="javax.persistence.jdbc.user" value="SYSTEM"/>
+      <property name="javax.persistence.jdbc.password" value="1211"/>
+      <property name="hibernate.show_sql" value="true"/>
     </properties>
   </persistence-unit>
 </persistence>

@@ -13,7 +13,7 @@ import javax.persistence.Table;
  * @author User
  */
 @Entity
-@Table(name="Stations")
+@Table(name="Stations",uniqueConstraints=@UniqueConstraint(columnNames="name"))
 public class Station {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -38,5 +38,17 @@ public class Station {
     }
     public String getName() {
         return this.name;
+    }
+    @Override
+    public String toString() {
+        return getName();
+    }
+    @Override
+    public boolean equals(Object o) {
+        Station s = (Station)o;
+        if (this.id == s.getId())
+            return true;
+        else 
+            return false;
     }
 }

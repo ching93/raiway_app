@@ -5,6 +5,7 @@
  */
 package kiri.mavenproject1.entities;
 
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
@@ -16,7 +17,7 @@ import javax.validation.constraints.*;
  * @author User
  */
 @Entity
-@Table(name="RouteStations",uniqueConstraints=@UniqueConstraint(columnNames={"route_id","station_id"}))
+@Table(name="RouteStations",uniqueConstraints={@UniqueConstraint(columnNames={"route_id","stationOrder"})})
 public class RouteStation {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -31,16 +32,24 @@ public class RouteStation {
     @NotNull
     @ManyToOne
     private Station station = new Station();
-    @ManyToOne
-    private Station  nextStation = new Station();
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name="arriveTime")
-    private Date arriveTime;
+    private Duration timeToCome;
+    @Column(name="stayTime")
+    private Duration stayTime;
+    @NotNull
+    @Column(name="totalDistance")
+    private float totalDistance = 0;
     public RouteStation() {
         
     }
     public void setId(int id) {
         this.id = id;
+    }
+    public void setTotalDistance(float totalDistance) {
+        this.totalDistance = totalDistance;
+    }
+    public float getTotalDistance() {
+        return this.totalDistance;
     }
     public void setStationOrder(int stationOrder) {
         this.stationOrder = stationOrder;
@@ -51,11 +60,11 @@ public class RouteStation {
     public void setStation(Station  station) {
         this.station = station;
     }
-    public void setNextStation(Station nextStation) {
-        this.nextStation = nextStation;
+    public void setTimeToCome(Duration timeToCome) {
+        this.timeToCome = timeToCome;
     }
-    public void setArriveTime(Date arriveTime) {
-        this.arriveTime = arriveTime;
+    public void setStayTime(Duration stayTime) {
+        this.stayTime = stayTime;
     }
     public Route getRoute() {
         return route;
@@ -63,16 +72,16 @@ public class RouteStation {
     public Station getStation() {
         return station;
     }
-    public Station getNextStation() {
-        return nextStation;
-    }
     public int getId() {
         return this.id;
     }
     public int getStationOrder() {
         return this.stationOrder;
     }
-    public Date getArriveTime() {
-        return arriveTime;
+    public Duration getTimeToCome() {
+        return timeToCome;
+    }
+    public Duration getStayTime() {
+        return stayTime;
     }
 }

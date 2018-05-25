@@ -18,18 +18,18 @@ public class Train {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name="id")
     private int id;
-    @Column(name="name")
-    private String name;
     @ManyToOne
     private TrainType trainType = new TrainType();
+    @Column(name="capacity")
+    private int capacity;
     public Train() {
         
     }
     public void setId(int id) {
         this.id = id;
     }
-    public void setName(String name) {
-        this.name = name;
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
     }
     public void setType(TrainType trainType) {
         this.trainType = trainType;
@@ -37,10 +37,14 @@ public class Train {
     public int getId() {
         return this.id;
     }
-    public String getName() {
-        return this.name;
+    public int getCapacity() {
+        return this.capacity;
     }
-    public TrainType setType() {
+    public TrainType getType() {
         return trainType;
+    }
+    @Override
+    public String toString() {
+        return "Train #"+id+" "+trainType.toString();
     }
 }
