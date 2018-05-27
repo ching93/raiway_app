@@ -15,22 +15,12 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import javax.swing.JFrame;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/**
- *
- * @author User
- */
 
 public class AdminPage extends JDialog {
     DBHandle handle;
     RouteStationsPanel routeStationsPnl;
     DateTimeBox trainDepBox;
-    //List<RouteNodePanel> routeNodes;
+    // Класс для вывода узла марштрута
     class RouteNodePanel extends JPanel {
         private JComboBox<Station> stationCombo;
         private final DateTimeBox stayTimeBox;
@@ -54,6 +44,8 @@ public class AdminPage extends JDialog {
                 stationCombo.removeActionListener(l);
             this.stationCombo.addActionListener(al);
         }
+        // Изменения узла маршрута, описываемого данным компонентом
+        // availables - спсиок станций, доступных из данной станции в маршруте
         public void setRouteStation(RouteStation rs, List<Station> availables) {
             this.routeStation = rs;
             this.stayTimeBox.setDuration(rs.getStayTime());
@@ -100,12 +92,13 @@ public class AdminPage extends JDialog {
             return routeStation;
         }
     }
+    // Класс-контейнер для узлов машрута
     class RouteStationsPanel extends JPanel {
         private List<RailwaySystem> railwaySystem;
-        //private List<RouteStation> routeStations;
         private ArrayList<RouteNodePanel> nodes;
         private Route currentRoute;
         private int difference = 0;
+        // Задается текущий маршрут, система ж\д веток, с помощью которых строится маршрут
         public RouteStationsPanel(Route route,List<RailwaySystem> railwaySystem) throws ParseException {
             this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
             this.railwaySystem = railwaySystem;
@@ -116,6 +109,8 @@ public class AdminPage extends JDialog {
                 this.setRoute(route);
             }
         }
+        // При изменении станции узла обновляется список доступых значений для следующего узла
+        // Если в обновленном списке присутствует ранне выбранный узел, то он сохраняется таковым
         private void setAvailableStation(ActionEvent evt) {
             try {
                 JComboBox<Station> src = (JComboBox<Station>)evt.getSource();
@@ -132,7 +127,7 @@ public class AdminPage extends JDialog {
                 System.out.println(exc.getMessage());
             }
         }
-        
+        // Добавление узла
         public void addNode(boolean validate) throws ParseException {
             int lastIndex = this.nodes.size()-1;
             RouteNodePanel node;
@@ -167,6 +162,7 @@ public class AdminPage extends JDialog {
             if (validate)
                 this.validate();
         }
+        // удаление узла
         public void removeNode() {
             int lastIndex = this.nodes.size()-1;
             if (lastIndex==-1)
@@ -174,10 +170,12 @@ public class AdminPage extends JDialog {
             this.remove(this.nodes.get(lastIndex));
             this.nodes.remove(lastIndex);
         }
+        // удаление всех узлов
         public void removeAllNodes() {
             for (int i=0; i<this.nodes.size();i++)
                 removeNode();
         }
+        // задание текущего мартрута
         public void setRoute(Route route) throws ParseException {
             this.currentRoute = route;
             List<RouteStation> routeStations = handle.getRouteStationsByRoute(route);
@@ -196,9 +194,11 @@ public class AdminPage extends JDialog {
             }
             validate();
         }
+        // изменение ж\д системы
         public void setRailwaySystem(List<RailwaySystem> railwaySystem) {
             this.railwaySystem = railwaySystem;
         }
+        // поиск доступных узлов для станции
         private List<Station> getSuitableFor(Station node) {
             if (node == null) {
                 return handle.getStations();
@@ -215,6 +215,7 @@ public class AdminPage extends JDialog {
                 return result;
             }
         }
+        // Извлечение выбранных станций
         public List<Object> getRouteStations() throws ParseException {
             List<Object> result = new ArrayList<>();
             int order = 1;
@@ -229,9 +230,9 @@ public class AdminPage extends JDialog {
     }
     /**
      * Creates new form NewJFrame
-     * @param handle
-     * @param owner
-     * @param type
+     * @param handle - класс работы с б\д
+     * @param owner - владелец данного модального окна
+     * @param type - тип модальности
      * @throws java.text.ParseException
      */
     public AdminPage(DBHandle handle, JFrame owner, JDialog.ModalityType type) throws ParseException {
@@ -862,7 +863,7 @@ public class AdminPage extends JDialog {
             this.messageLbl.setText(exc.getMessage());
         }
     }//GEN-LAST:event_TrainAddBtnActionPerformed
-
+    // При показе формы обновляем все данные
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         try {
             this.refreshData();
@@ -872,7 +873,7 @@ public class AdminPage extends JDialog {
             this.messageLbl.setText(exc.getMessage());
         }
     }//GEN-LAST:event_formComponentShown
-
+    // Добавление ж\д ветки в б\д
     private void addBranchBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBranchBtnActionPerformed
         try {
             Station in = (Station)inStationCombo.getSelectedItem();                                     
@@ -891,7 +892,7 @@ public class AdminPage extends JDialog {
     private void outStationComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_outStationComboActionPerformed
         
     }//GEN-LAST:event_outStationComboActionPerformed
-
+    // добавление нового маршрута в б\д
     private void addRouteNodeBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addRouteNodeBtnActionPerformed
         try {
             this.routeStationsPnl.addNode(true);
@@ -901,7 +902,7 @@ public class AdminPage extends JDialog {
             this.messageLbl.setText(exc.getMessage());
         }
     }//GEN-LAST:event_addRouteNodeBtnActionPerformed
-
+    // нажатие кнопки удаления узла маршрута
     private void RemoveRouteNodeBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RemoveRouteNodeBtnActionPerformed
         try {
             this.routeStationsPnl.removeNode();
@@ -911,7 +912,7 @@ public class AdminPage extends JDialog {
             this.messageLbl.setText(exc.getMessage());
         }
     }//GEN-LAST:event_RemoveRouteNodeBtnActionPerformed
-
+    // нажатие кнопки добавления узла маршрута
     private void addRouteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addRouteBtnActionPerformed
         try {
             Train train = (Train)routeTrainCombo.getSelectedItem();
@@ -925,7 +926,7 @@ public class AdminPage extends JDialog {
             this.messageLbl.setText(exc.getMessage());
         }
     }//GEN-LAST:event_addRouteBtnActionPerformed
-
+    // нажатие кнопки сохранения выбранных узлов маршрута
     private void saveRouteStationsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveRouteStationsBtnActionPerformed
         try {
             this.handle.resetRouteStations(this.routeStationsPnl.getRouteStations());
@@ -939,7 +940,7 @@ public class AdminPage extends JDialog {
     private void trainTypeComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_trainTypeComboActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_trainTypeComboActionPerformed
-
+    // изменение маршрута для редактирования
     private void routeComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_routeComboActionPerformed
         try {
             Route selected = (Route)this.routeCombo.getSelectedItem();
@@ -952,7 +953,7 @@ public class AdminPage extends JDialog {
     private void loginBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginBtnActionPerformed
                
     }//GEN-LAST:event_loginBtnActionPerformed
-
+    // нажатие кнопки добавления новыого отправления
     private void addScheduleBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addScheduleBtnActionPerformed
         try {
             Route route = (Route)scheduleRouteCombo.getSelectedItem();
@@ -968,7 +969,7 @@ public class AdminPage extends JDialog {
             this.messageLbl.setText(exc.getMessage());
         }
     }//GEN-LAST:event_addScheduleBtnActionPerformed
-
+    // открытие модального окна показа существующих маршрутов
     private void showRoutesBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showRoutesBtnActionPerformed
         routePage routes = new routePage(handle,this);
         routes.setDefaultCloseOperation(HIDE_ON_CLOSE);
@@ -977,7 +978,7 @@ public class AdminPage extends JDialog {
     }//GEN-LAST:event_showRoutesBtnActionPerformed
 
     /**
-     * @param args the command line arguments
+     * Обновление всех данных окна
      */
     private void refreshData() {
         try {
@@ -1012,6 +1013,7 @@ public class AdminPage extends JDialog {
             this.messageLbl.setText(exc.getMessage());
         }
     }
+    // обновление панели резактирования маршрута
     private void refreshRoutePanel() throws ParseException {
         Route route = (Route)routeCombo.getSelectedItem();
         if (route!=null) {
@@ -1020,11 +1022,6 @@ public class AdminPage extends JDialog {
             routeStationsPnl.setRoute(route);
             this.routeStationsPanel.validate();
         }
-        //if (!routeStationsPanel.isAncestorOf(routeStationsPnl))
-        //    this.routeStationsPanel.add(this.routeStationsPnl);
-        
-        //TableModel model = new RouteStationTableModel(routeStations, railwaySystem);
-        //this.routeStationsTbl.setModel(model);
     }
     
 
