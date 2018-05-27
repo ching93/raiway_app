@@ -50,7 +50,7 @@ public class AuthPage extends javax.swing.JDialog {
 
         jLabel1.setText("Введите логин:");
 
-        jLabel2.setText("Введите логин:");
+        jLabel2.setText("Введите пароль:");
 
         okBtn.setText("Войти");
         okBtn.addActionListener(new java.awt.event.ActionListener() {

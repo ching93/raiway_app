@@ -110,11 +110,25 @@ public class DBHandle {
         query.setParameter("password", properties.get("password"));
         currentUser = (User)query.getSingleResult();
     }
+    public void addNewUser(User user) {
+        if (currentUser.getRole().getId()!=1 && user.getRole().getId()==1)
+            throw new IllegalArgumentException("Пользователь должен быть администратором для этого действия");
+        EntityManager manager = managerFactory.createEntityManager();
+        manager.getTransaction().begin();
+        manager.persist(user);
+        manager.getTransaction().commit();        
+    }
     public Role getUserRole() {
         if (currentUser!=null)
             return currentUser.getRole();
         else
             return null;
+    }
+    public List<Role> getRoles() {
+        EntityManager manager = managerFactory.createEntityManager();
+        Query q = manager.createQuery("from Role");
+        List<Role> result = q.getResultList();
+        return result;
     }
     public boolean isLogged() {
         return isLogged;

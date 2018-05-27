@@ -116,14 +116,21 @@ public class TicketPage extends JFrame {
         rightBorderBox.setDateTime(LocalDateTime.now().plus(Duration.ofDays(5)));
         this.rightBorderPnl.add(rightBorderBox);
         this.rightBorderPnl.validate();
-        Role userRole = handle.getUserRole();
-        if (userRole!=null & userRole.getId()==1)
-            this.adminPageBtn.setEnabled(true);
+        
         try {
+            Role userRole = handle.getUserRole();
+            if (userRole!=null & userRole.getId()==1)
+                this.adminPageBtn.setEnabled(true);
             showStations();
         }
         catch (Throwable exc) {
             this.messageLbl.setText(exc.getMessage());
+            for (int i=0; i<10; i++) {
+                System.out.println("Error: "+exc.getMessage());
+                exc = exc.getCause();
+                if (exc==null)
+                    break;
+            }
         }        
     }
     private void showStations() {
@@ -318,6 +325,11 @@ public class TicketPage extends JFrame {
         });
 
         signInBtn.setText("Зарегистироваться");
+        signInBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                signInBtnActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -413,6 +425,12 @@ public class TicketPage extends JFrame {
     private void logInBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logInBtnActionPerformed
         logIn();
     }//GEN-LAST:event_logInBtnActionPerformed
+
+    private void signInBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_signInBtnActionPerformed
+        signInPage page = new signInPage(handle,this);
+        page.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        page.setVisible(true);
+    }//GEN-LAST:event_signInBtnActionPerformed
     
     private void logIn() {
         AuthPage authPage = new AuthPage(handle,this);

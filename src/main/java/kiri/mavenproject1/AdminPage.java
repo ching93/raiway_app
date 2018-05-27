@@ -305,7 +305,6 @@ public class AdminPage extends JDialog {
         jLabel19 = new javax.swing.JLabel();
         jLabel20 = new javax.swing.JLabel();
         pricePerKmBox = new javax.swing.JTextField();
-        createNewUserBtn = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jPanel2 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
@@ -658,13 +657,6 @@ public class AdminPage extends JDialog {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        createNewUserBtn.setText("Добавить нового пользователя");
-        createNewUserBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                createNewUserBtnActionPerformed(evt);
-            }
-        });
-
         jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         jPanel2.setAutoscrolls(true);
 
@@ -779,9 +771,7 @@ public class AdminPage extends JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(messageLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 482, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(239, 239, 239)
-                        .addComponent(createNewUserBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGap(451, 451, 451)
                         .addComponent(loginBtn))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -819,7 +809,6 @@ public class AdminPage extends JDialog {
                                             .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))))
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(createNewUserBtn, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(loginBtn, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(messageLbl, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
@@ -980,10 +969,6 @@ public class AdminPage extends JDialog {
         }
     }//GEN-LAST:event_addScheduleBtnActionPerformed
 
-    private void createNewUserBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createNewUserBtnActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_createNewUserBtnActionPerformed
-
     private void showRoutesBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showRoutesBtnActionPerformed
         routePage routes = new routePage(handle,this);
         routes.setDefaultCloseOperation(HIDE_ON_CLOSE);
@@ -1050,7 +1035,6 @@ public class AdminPage extends JDialog {
     private javax.swing.JButton addRouteBtn;
     private javax.swing.JButton addRouteNodeBtn;
     private javax.swing.JButton addScheduleBtn;
-    private javax.swing.JButton createNewUserBtn;
     private javax.swing.JTextField distanceBox;
     private javax.swing.JComboBox<Station> inStationCombo;
     private javax.swing.JLabel jLabel1;
