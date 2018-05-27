@@ -30,6 +30,9 @@ public class TicketPerBranch {
     @Column(name="arriveTime")
     private LocalDateTime arriveTime;
     @NotNull
+    @Column(name="totalDistance")
+    private float totalDistance = 0;
+    @NotNull
     @ManyToOne
     private Station station = new Station();
     public TicketPerBranch() {
@@ -39,6 +42,12 @@ public class TicketPerBranch {
         this.schedule = schedule;
         this.station = station;
         this.amount = amount;
+    }
+    public void setTotalDistance(float totalDistance) {
+        this.totalDistance = totalDistance;
+    }
+    public float getTotalDistance() {
+        return this.totalDistance;
     }
     public void setId(int id) {
         this.id = id;

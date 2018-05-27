@@ -24,9 +24,9 @@ public class Ticket {
     private float price;
     @NotNull
     @ManyToOne
-    private Consumer consumer = new Consumer();
+    private User consumer = new User();
     @NotNull
-    @ManyToOne(cascade=CascadeType.PERSIST)
+    @ManyToOne
     private Schedule schedule = new Schedule();
     @NotNull
     @ManyToOne
@@ -37,7 +37,7 @@ public class Ticket {
     public Ticket() {
         
     }
-    public Ticket(Station depStation, Station arrStation, Schedule schedule, Consumer consumer) {
+    public Ticket(Station depStation, Station arrStation, Schedule schedule, User consumer, Float price) {
         this.depStation = depStation;
         this.arrStation = arrStation;
         this.schedule = schedule;
@@ -55,7 +55,7 @@ public class Ticket {
     public void setSchedule(Schedule schedule) {
         this.schedule = schedule;
     }
-    public void setConsumer(Consumer consumer) {
+    public void setConsumer(User consumer) {
         this.consumer = consumer;
     }
     public void setPrice(float price) {
@@ -73,7 +73,7 @@ public class Ticket {
     public Schedule getSchedule() {
         return schedule;
     }
-    public Consumer getConsumer() {
+    public User getConsumer() {
         return consumer;
     }
     public float getPrice() {
@@ -81,6 +81,6 @@ public class Ticket {
     }
     @Override
     public String toString() {
-        return "Билет #"+id+" "+consumer.getLastname();
+        return consumer.getLastname()+" на отправление "+schedule.toString()+"c "+depStation.toString()+" до "+arrStation.toString();
     }
 }

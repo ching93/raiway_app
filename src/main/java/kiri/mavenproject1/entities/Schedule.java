@@ -16,6 +16,7 @@ import java.util.Date;
  *
  * @author User
  */
+
 @Entity
 @Table(name="Schedules")
 public class Schedule {
@@ -69,5 +70,9 @@ public class Schedule {
     }
     public float getPricePerKm() {
         return pricePerKm;
+    }
+    @Override
+    public String toString() {
+        return "#"+this.id+" "+this.route.toString();
     }
 }

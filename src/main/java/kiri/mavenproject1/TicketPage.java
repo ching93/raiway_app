@@ -5,17 +5,16 @@
  */
 package kiri.mavenproject1;
 
-import java.text.DateFormat;
+import java.text.ParseException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAmount;
-import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BoxLayout;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.table.TableModel;
+import javax.swing.table.AbstractTableModel;
 import kiri.mavenproject1.DBHandle.PrepareTicketResult;
 import kiri.mavenproject1.entities.*;
 
@@ -23,22 +22,91 @@ import kiri.mavenproject1.entities.*;
  *
  * @author User
  */
-public class TicketPage extends JDialog {
+public class TicketPage extends JFrame {
     private DBHandle handle;
     DateTimeBox leftBorderBox;
     DateTimeBox rightBorderBox;
+    
+    class ResultTableModel extends AbstractTableModel {
+        private List<PrepareTicketResult> results;
+        private String[] columnNames = new String[] {"X","Маршрут","Время отправления","Время прибытия","Время в пути","Цена"};
+        private int selectedRow;
+        public ResultTableModel(List<PrepareTicketResult> results) {
+            this.results = results;
+            selectedRow = -1;
+        }
+        public PrepareTicketResult getSelectedResult() {
+            if (selectedRow!=-1)
+                return results.get(selectedRow);
+            else
+                return null;
+        }
+        @Override
+        public Class<?> getColumnClass(int columnIndex) {
+            if (columnIndex==0)
+                return Boolean.class;
+            else if(columnIndex==5)
+                return Float.class;
+            else
+                return String.class;
+        }
+        @Override
+        public boolean isCellEditable(int rowIndex, int columnIndex) {
+            return columnIndex == 0;
+        }
+        @Override
+        public void setValueAt(Object value, int rowIndex, int columnIndex) {
+            selectedRow = rowIndex;
+            //this.fireTableCellUpdated(rowIndex, columnIndex);
+        }
+        @Override
+        public String getColumnName(int columnIndex) {
+            return columnNames[columnIndex];
+        }
+        @Override
+        public int getRowCount() {
+            return results.size();
+        }
+        @Override
+        public int getColumnCount() {
+            return 6;
+        }
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            PrepareTicketResult current = this.results.get(rowIndex);
+            switch (columnIndex) {
+                case 0:
+                    if (selectedRow==-1)
+                        return false;
+                    else
+                        return rowIndex == selectedRow;
+                case 1:
+                    return current.arrStation.getSchedule().getRoute().toString();
+                case 2:
+                    return current.arrStation.getSchedule().getDepartureTime().toString();
+                case 3:
+                    return current.arrStation.getArriveTime().toString();
+                case 4:
+                    Duration time = Duration.between(current.depStation.getArriveTime(), current.arrStation.getArriveTime());
+                    long hours = time.toHours();
+                    long minutes = time.minusHours(hours).toMinutes();
+                    return hours+"часов "+minutes+"минут";
+                case 5:
+                    return current.price;
+                
+            }
+            return "nothing";
+        }
+    }
     /**
      * Creates new form TicketPage
      * @param handle
      * @param owner
      * @param modalityType
      */
-    public TicketPage(DBHandle handle, JFrame owner, JDialog.ModalityType modalityType) {
-        super(owner,  modalityType);// modalityType);
-        
+    public TicketPage(DBHandle handle) {        
         initComponents();
         this.handle = handle;
-        showStations();
         leftBorderBox = new DateTimeBox(2);
         leftBorderBox.setDateTime(LocalDateTime.now());
         this.leftBorderPnl.setLayout(new BoxLayout(leftBorderPnl,BoxLayout.X_AXIS));
@@ -48,9 +116,15 @@ public class TicketPage extends JDialog {
         rightBorderBox.setDateTime(LocalDateTime.now().plus(Duration.ofDays(5)));
         this.rightBorderPnl.add(rightBorderBox);
         this.rightBorderPnl.validate();
-        
-        
-        
+        Role userRole = handle.getUserRole();
+        if (userRole!=null & userRole.getId()==1)
+            this.adminPageBtn.setEnabled(true);
+        try {
+            showStations();
+        }
+        catch (Throwable exc) {
+            this.messageLbl.setText(exc.getMessage());
+        }        
     }
     private void showStations() {
         List<Station> stations = handle.getStations();
@@ -81,11 +155,16 @@ public class TicketPage extends JDialog {
         rightBorderPnl = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
         applyBtn = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        resultTable = new javax.swing.JTable();
         buyBtn1 = new javax.swing.JButton();
         messageLbl = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        resultTable = new javax.swing.JTable();
+        logInBtn = new javax.swing.JButton();
+        adminPageBtn = new javax.swing.JButton();
+        signInBtn = new javax.swing.JButton();
 
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Покупка билета");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
@@ -196,16 +275,23 @@ public class TicketPage extends JDialog {
                 .addContainerGap())
         );
 
+        buyBtn1.setText("Купить");
+        buyBtn1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buyBtn1ActionPerformed(evt);
+            }
+        });
+
         resultTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "Маршрут", "Время отправления", "Время прибытия", "Стоимость билета", "Время в пути"
+                "Маршрут", "Время отправления", "Время прибытия", "Время в пути"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Float.class, java.lang.String.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -214,7 +300,24 @@ public class TicketPage extends JDialog {
         });
         jScrollPane1.setViewportView(resultTable);
 
-        buyBtn1.setText("Купить");
+        jScrollPane2.setViewportView(jScrollPane1);
+
+        logInBtn.setText("Войти");
+        logInBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                logInBtnActionPerformed(evt);
+            }
+        });
+
+        adminPageBtn.setText("<html>Панель<br>администратора</html>");
+        adminPageBtn.setEnabled(false);
+        adminPageBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                adminPageBtnActionPerformed(evt);
+            }
+        });
+
+        signInBtn.setText("Зарегистироваться");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -223,26 +326,38 @@ public class TicketPage extends JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                         .addComponent(buyBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 212, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jScrollPane1)))
-                    .addComponent(messageLbl))
-                .addContainerGap(23, Short.MAX_VALUE))
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 953, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(messageLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 727, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(signInBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(adminPageBtn)
+                    .addComponent(logInBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 386, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(buyBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(messageLbl)
-                .addContainerGap())
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 447, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(messageLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(buyBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(logInBtn)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(signInBtn)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(adminPageBtn, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -253,26 +368,75 @@ public class TicketPage extends JDialog {
         Station arrStation = (Station)this.arrStationCombo.getSelectedItem();
         LocalDateTime leftBorder = this.leftBorderBox.getDateTime();
         LocalDateTime rightBorder = this.rightBorderBox.getDateTime();
-        try {
-            PrepareTicketResult result = handle.prepareBuyTicket(depStation, arrStation, leftBorder, rightBorder);
-            TableModel model = resultTable.getModel();
-            
-            for (int i=0; i<result.schedule.size(); i++) {
-                float price = (result.arrStation.get(i).getTotalDistance() - result.arrStation.get(i).getTotalDistance())*result.schedule.get(i).getPricePerKm();
-                
-                
-                model.setValueAt(result.schedule.get(i).getRoute().toString(), 0, i);
-                model.setValueAt(result.schedule.get(i).getDepartureTime(), 1, i);
-                model.setValueAt(result.arrStation.get(i).getTimeToCome(), 2, i);
-                model.setValueAt(price, 3, i);
+        List<PrepareTicketResult> result = handle.prepareBuyTicket(depStation, arrStation, leftBorder, rightBorder);
+        if (result == null || result.size()==0) {
+            this.messageLbl.setText("Не найдено отправлений с заданными параметрами");
+            return;
+        }
+        ResultTableModel model = new ResultTableModel(result);
+        this.resultTable.setModel(model);
+        this.resultTable.validate();
+    }//GEN-LAST:event_applyBtnActionPerformed
+
+    private void buyBtn1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buyBtn1ActionPerformed
+        PrepareTicketResult result = ((ResultTableModel)this.resultTable.getModel()).getSelectedResult();
+        if (result == null)
+            this.messageLbl.setText("Не выбрано значение");
+        else
+            try {
+                handle.buyTicket(result);
+                this.messageLbl.setText("Билет успешно куплен");
             }
+        catch (Throwable exc) {
+            this.messageLbl.setText(exc.getMessage());
+            for (int i=0; i<10; i++) {
+                System.out.println("Error: "+exc.getMessage());
+                exc = exc.getCause();
+                if (exc==null)
+                    break;
+            }
+        }
+            
+    }//GEN-LAST:event_buyBtn1ActionPerformed
+
+    private void adminPageBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_adminPageBtnActionPerformed
+        AdminPage tp;
+        try {
+            tp = new AdminPage(handle,this,JDialog.ModalityType.DOCUMENT_MODAL);
+            tp.setVisible(true);
+        } catch (ParseException ex) {
+            System.out.println(ex.getMessage());
+            this.messageLbl.setText(ex.getMessage());
+        }
+    }//GEN-LAST:event_adminPageBtnActionPerformed
+
+    private void logInBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logInBtnActionPerformed
+        logIn();
+    }//GEN-LAST:event_logInBtnActionPerformed
+    
+    private void logIn() {
+        AuthPage authPage = new AuthPage(handle,this);
+        authPage.setDefaultCloseOperation(HIDE_ON_CLOSE);
+        authPage.setVisible(true);
+        try {
+            if (authPage.isLogged()) {
+                this.showStations();
+                if (handle.getUserRole().getId()==1)
+                    this.adminPageBtn.setEnabled(true);
+                else this.adminPageBtn.setEnabled(false);
+                this.messageLbl.setText("Вы успешно вошли");
+            }
+            else
+                this.messageLbl.setText("Неправильный логин или пароль");
         }
         catch (Throwable exc) {
             this.messageLbl.setText(exc.getMessage());
         }
-    }//GEN-LAST:event_applyBtnActionPerformed
+        authPage.dispose(); 
+    }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton adminPageBtn;
     private javax.swing.JButton applyBtn;
     private javax.swing.JComboBox<Station> arrStationCombo;
     private javax.swing.JButton buyBtn1;
@@ -284,9 +448,12 @@ public class TicketPage extends JDialog {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JPanel leftBorderPnl;
+    private javax.swing.JButton logInBtn;
     private javax.swing.JLabel messageLbl;
     private javax.swing.JTable resultTable;
     private javax.swing.JPanel rightBorderPnl;
+    private javax.swing.JButton signInBtn;
     // End of variables declaration//GEN-END:variables
-}
+    }

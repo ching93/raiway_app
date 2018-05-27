@@ -66,6 +66,7 @@ public class AuthPage extends javax.swing.JDialog {
             }
         });
 
+        saveChkBox.setSelected(true);
         saveChkBox.setText("Сохранить");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -112,7 +113,8 @@ public class AuthPage extends javax.swing.JDialog {
     private void okBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okBtnActionPerformed
         String login = this.loginBox.getText();
         String password = this.passwordBox.getText();
-        if (handle.logIn(login, password))
+        boolean save = this.saveChkBox.isSelected();
+        if (handle.logIn(login, password,save))
             isLogged = true;
         else
             isLogged = false;

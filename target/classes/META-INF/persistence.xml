@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
-  <persistence-unit name="railway_mysql" transaction-type="RESOURCE_LOCAL">
+  <persistence-unit name="railway_oracle" transaction-type="RESOURCE_LOCAL">
     <provider>org.hibernate.ejb.HibernatePersistence</provider>
     <!--<jta-data-source>java:jboss/railwaymysql</jta-data-source>-->
     <class>kiri.mavenproject1.entities.RailwaySystem</class>
@@ -10,12 +10,15 @@
     <class>kiri.mavenproject1.entities.TrainType</class>
     <class>kiri.mavenproject1.entities.Schedule</class>
     <class>kiri.mavenproject1.entities.Route</class>
+    <class>kiri.mavenproject1.entities.Ticket</class>
+    <class>kiri.mavenproject1.entities.TicketPerBranch</class>
+    <class>kiri.mavenproject1.entities.User</class>
     <properties>
       <property name="hibernate.hbm2dll.auto" value="create"/>
       <!--<property name="javax.persistence.jdbc.driver_class" value="com.mysql.jdbc.Driver"/>-->
       <property name="javax.persistence.jdbc.driver_class" value="oracle.jdbc.OracleDriver"/>
       <!--<property name="javax.persistence.jdbc.url" value="jdbc:mysql://127.0.0.1:3306/railway?serverTimezone=UTC"/>-->
-      <property name="javax.persistence.jdbc.url" value="jdbc:oracle:thin:@localhost:1521:xe"/>
+      <!--<property name="javax.persistence.jdbc.url" value="jdbc:oracle:thin:@localhost:1521:xe"/>-->
       <!--<property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>-->
       <!--<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect"/>-->
       <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect"/>

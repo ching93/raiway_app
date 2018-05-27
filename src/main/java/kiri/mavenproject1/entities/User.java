@@ -13,12 +13,18 @@ import javax.validation.constraints.NotNull;
  * @author User
  */
 @Entity
-@Table(name="Consumers")
-public class Consumer {
+@Table(name="Users")
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name="id")
     private int id;
+    @NotNull
+    @Column(name="login",unique=true)
+    private String login;
+    @NotNull
+    @Column(name="password")
+    private String password;
     @NotNull
     @Column(name="firstname")
     private String firstname;
@@ -28,16 +34,25 @@ public class Consumer {
     @NotNull
     @Column(name="email",unique=true)
     private String email;
-    public Consumer() {
+    @NotNull
+    @ManyToOne
+    private Role role = new Role();
+    public User() {
         
     }
-    public Consumer(String firstname, String lastname, String email) {
+    public User(String firstname, String lastname, String email) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
     }
     public void setId(int id) {
         this.id = id;
+    }
+    public void setLogin(String login) {
+        this.login = login;
+    }
+    public void setPassword(String password) {
+        this.password = password;
     }
     public void setFirstname(String firstname) {
         this.firstname = firstname;
@@ -48,8 +63,17 @@ public class Consumer {
     public void setEmail(String email) {
         this.email = email;
     }
+    public void setRole(Role role) {
+        this.role = role;
+    }
     public int getId() {
         return this.id;
+    }
+    public String getLogin() {
+        return login;
+    }
+    public String getPassword() {
+        return password;
     }
     public String getFirstname() {
         return firstname;
@@ -59,6 +83,9 @@ public class Consumer {
     }
     public String getEmail() {
         return email;
+    }
+    public Role getRole() {
+        return role;
     }
     @Override
     public String toString() {
