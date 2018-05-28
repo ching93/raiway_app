@@ -428,6 +428,18 @@ public class DBHandle {
         }
         return result;
     }
+    public List<RouteStation> getFirstLastRouteStations() {
+        EntityManager manager = managerFactory.createEntityManager();
+        String sqlFirsts = "select rs from RouteStation rs where rs.stationOrder=1";
+        Query q = manager.createQuery(sqlFirsts);
+        List<RouteStation> fs = q.getResultList();
+        System.out.println("Firsts: "+fs.size());
+        String sqlLasts = "select rs from RouteStation rs where rs.stationOrder IN (select COUNT(rs1.route.id) from RouteStation rs1 group by rs1.route.id having rs1.route.id=rs.route.id)";
+        Query q1 = manager.createQuery(sqlLasts);
+        List<RouteStation> ls = q1.getResultList();
+        ls.addAll(fs);
+        return ls;
+    }
     /**
      * Станции всех маршрутов
      * @return 

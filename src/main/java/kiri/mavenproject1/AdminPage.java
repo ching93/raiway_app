@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 
 public class AdminPage extends JDialog {
@@ -25,7 +26,6 @@ public class AdminPage extends JDialog {
         private JComboBox<Station> stationCombo;
         private final DateTimeBox stayTimeBox;
         private final DateTimeBox timeToComeBox;
-        //private final JTextField dateBox;
         private RouteStation routeStation;
         public RouteNodePanel(List<Station> stations, Station currentStation, RouteStation routeStation) {
             this.setLayout(new BoxLayout(this,BoxLayout.X_AXIS));
@@ -38,6 +38,13 @@ public class AdminPage extends JDialog {
             this.add(new LabeledComponent("Время в пути",timeToComeBox));
             setRouteStation(routeStation,stations);
             this.validate();
+        }
+        public void setFirst() {
+            stayTimeBox.setEnabled(false);
+            timeToComeBox.setEnabled(false);
+        }
+        public void setLast() {
+            stayTimeBox.setEnabled(false);
         }
         public void setSelectAction(ActionListener al) {
             for (ActionListener l: stationCombo.getActionListeners())
@@ -97,12 +104,10 @@ public class AdminPage extends JDialog {
         private List<RailwaySystem> railwaySystem;
         private ArrayList<RouteNodePanel> nodes;
         private Route currentRoute;
-        private int difference = 0;
         // Задается текущий маршрут, система ж\д веток, с помощью которых строится маршрут
         public RouteStationsPanel(Route route,List<RailwaySystem> railwaySystem) throws ParseException {
             this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
             this.railwaySystem = railwaySystem;
-            difference = 0;
             nodes = new ArrayList<RouteNodePanel>();
             if (route!=null) {
                 this.setRailwaySystem(railwaySystem);
@@ -128,35 +133,40 @@ public class AdminPage extends JDialog {
             }
         }
         // Добавление узла
-        public void addNode(boolean validate) throws ParseException {
+        public void addNode(RouteStation rs, boolean validate) throws ParseException {
             int lastIndex = this.nodes.size()-1;
             RouteNodePanel node;
-            RouteStation rs = new RouteStation();
             if (lastIndex==-1) {
-                rs.setTimeToCome(Duration.ZERO);
-                rs.setStayTime(Duration.ZERO);
-                rs.setRoute(currentRoute);
-                rs.setStation(null);
-                rs.setStationOrder(1);
+                if (rs == null) {
+                    rs = new RouteStation();
+                    rs.setTimeToCome(Duration.ZERO);
+                    rs.setStayTime(Duration.ZERO);
+                    rs.setRoute(currentRoute);
+                    rs.setStation(null);
+                    rs.setStationOrder(1);
+                }
                 System.out.println("added rs with 1st order");
                 node = new RouteNodePanel(getSuitableFor(null),null,rs);
-                node.setSelectAction((new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        setAvailableStation(evt);
-                    }
-                }));
             } else {
                 RouteNodePanel lastNode = this.nodes.get(lastIndex);
                 RouteStation lastRs = lastNode.getRouteStation();
                 List<Station> availables = this.getSuitableFor(lastRs.getStation());
-                rs.setRoute(this.currentRoute);
-                rs.setTimeToCome(lastRs.getTimeToCome());
-                rs.setStayTime(lastRs.getStayTime());
-                rs.setStationOrder(lastNode.getOrder()+1);
+                if (rs == null) {
+                    rs = new RouteStation();
+                    rs.setRoute(this.currentRoute);
+                    rs.setTimeToCome(lastRs.getTimeToCome());
+                    rs.setStayTime(lastRs.getStayTime());
+                    rs.setStationOrder(lastNode.getOrder()+1);
+                }
                 System.out.println("added rs with "+rs.getStationOrder()+" order");
-                //Station lastNodeStation = (Station)lastNode.stationCombo.getSelectedItem();
                 node = new RouteNodePanel(availables,availables.get(0),rs);
             }
+            node.setSelectAction((new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent evt) {
+                    setAvailableStation(evt);
+                }
+            }));
             this.nodes.add(node);
             this.add(node);
             if (validate)
@@ -172,7 +182,7 @@ public class AdminPage extends JDialog {
         }
         // удаление всех узлов
         public void removeAllNodes() {
-            for (int i=0; i<this.nodes.size();i++)
+            for (int i=0; i<=this.nodes.size();i++)
                 removeNode();
         }
         // задание текущего мартрута
@@ -180,19 +190,10 @@ public class AdminPage extends JDialog {
             this.currentRoute = route;
             List<RouteStation> routeStations = handle.getRouteStationsByRoute(route);
             this.removeAllNodes();
-            for (int i=0;i<routeStations.size();i++) {
-                RouteStation rs = routeStations.get(i);
-                Station station;
-                if (i==0)
-                    station = null;
-                else
-                    station = routeStations.get(i-1).getStation();
-                List<Station> availables = this.getSuitableFor(station);
-                RouteNodePanel node = new RouteNodePanel(availables,availables.get(0),rs);
-                this.nodes.add(node);
-                this.add(node);
+            for (RouteStation rs: routeStations) {
+                addNode(rs,false);
             }
-            validate();
+            routeStationsPanel.validate();
         }
         // изменение ж\д системы
         public void setRailwaySystem(List<RailwaySystem> railwaySystem) {
@@ -240,17 +241,13 @@ public class AdminPage extends JDialog {
         this.handle = handle;
         initComponents();
         this.routeStationsPanel.setLayout(new BoxLayout(routeStationsPanel,BoxLayout.Y_AXIS));
-        //trainTypeCombo.setPrototypeDisplayValue(new TrainType("Выберите тип поезда"));
         trainDepBox = new DateTimeBox(2);
         trainDepBox.setDateTime(LocalDateTime.now());
         this.trainDepPanel.add(trainDepBox);
         this.trainDepPanel.setLayout(new BoxLayout(trainDepPanel,BoxLayout.X_AXIS));
-        trainDepPanel.validate();
         routeStationsPnl = new RouteStationsPanel((Route)this.routeCombo.getSelectedItem(),handle.getRailwaySystem());
         this.routeStationsPanel.add(this.routeStationsPnl);
         this.validate();
-        //routeNodes = new ArrayList<routeNodePanel>();
-        //this.add(authPage);
     }
 
     /**
@@ -275,7 +272,6 @@ public class AdminPage extends JDialog {
         jLabel7 = new javax.swing.JLabel();
         priceCoeffBox = new javax.swing.JTextField();
         jLabel17 = new javax.swing.JLabel();
-        messageLbl = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
         TrainAddBtn = new javax.swing.JButton();
         trainCapacityBox = new javax.swing.JTextField();
@@ -316,6 +312,7 @@ public class AdminPage extends JDialog {
         jLabel5 = new javax.swing.JLabel();
         routeStationsPanel = new javax.swing.JPanel();
         showRoutesBtn = new javax.swing.JButton();
+        showRoutesBtn1 = new javax.swing.JButton();
 
         jLabel1.setText("jLabel1");
 
@@ -610,7 +607,7 @@ public class AdminPage extends JDialog {
             .addGap(0, 27, Short.MAX_VALUE)
         );
 
-        jLabel19.setText("Маршрут");
+        jLabel19.setText("Время и дата");
 
         jLabel20.setText("Цена одного км поездки");
 
@@ -758,6 +755,13 @@ public class AdminPage extends JDialog {
             }
         });
 
+        showRoutesBtn1.setText("Удалить все узлы");
+        showRoutesBtn1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showRoutesBtn1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -771,8 +775,7 @@ public class AdminPage extends JDialog {
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(messageLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 482, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(451, 451, 451)
+                        .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(loginBtn))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -782,7 +785,10 @@ public class AdminPage extends JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 792, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(showRoutesBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(showRoutesBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(16, 16, 16)
+                                .addComponent(showRoutesBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap(18, Short.MAX_VALUE))
         );
@@ -806,12 +812,12 @@ public class AdminPage extends JDialog {
                                         .addGap(176, 176, 176))
                                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                            .addComponent(showRoutesBtn)
+                                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                .addComponent(showRoutesBtn)
+                                                .addComponent(showRoutesBtn1))
                                             .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))))
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(loginBtn, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(messageLbl, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(loginBtn))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
@@ -829,11 +835,11 @@ public class AdminPage extends JDialog {
             Station station = new Station();
             station.setName(this.stationNameBox.getText());
             handle.addStation(station);
-            this.messageLbl.setText("Новая станция успешно добавлена");
+            this.showMessage("Новая станция успешно добавлена","",false);
             this.refreshData();
         }
         catch (Throwable exc) {
-            this.messageLbl.setText(exc.getMessage());
+            this.showMessage(exc.getMessage(),"",true);
         }
     }//GEN-LAST:event_stationNameBtnActionPerformed
 
@@ -842,11 +848,11 @@ public class AdminPage extends JDialog {
             TrainType type = new TrainType(this.trainTypeBox.getText());
             type.setPriceCoeff(Float.parseFloat(this.priceCoeffBox.getText()));
             handle.addTrainType(type);
-            this.refreshData();
-            this.messageLbl.setText("Новый тип поезда успешно добавлен");
+            this.loadTrainTypes(); // refreshData();
+            this.showMessage("Новый тип поезда успешно добавлен","",false);
         }
         catch (Throwable exc) {
-            this.messageLbl.setText(exc.getMessage());
+            this.showMessage(exc.getMessage(),"",true);
         }
     }//GEN-LAST:event_trainTypeBtnActionPerformed
 
@@ -856,11 +862,11 @@ public class AdminPage extends JDialog {
             train.setType((TrainType)trainTypeCombo.getSelectedItem());
             train.setCapacity(Integer.parseInt(this.trainCapacityBox.getText()));
             handle.addTrain(train);
-            this.refreshData();
-            this.messageLbl.setText("Поезд успешно добавлен");
+            this.loadRouteTrains(); // refreshData();
+            this.showMessage("Поезд успешно добавлен","",false);
         }
         catch (Throwable exc) {
-            this.messageLbl.setText(exc.getMessage());
+            this.showMessage(exc.getMessage(),"",true);
         }
     }//GEN-LAST:event_TrainAddBtnActionPerformed
     // При показе формы обновляем все данные
@@ -870,7 +876,7 @@ public class AdminPage extends JDialog {
             this.refreshRoutePanel();
         }
         catch (Throwable exc) {
-            this.messageLbl.setText(exc.getMessage());
+            this.showMessage(exc.getMessage(),"",true);
         }
     }//GEN-LAST:event_formComponentShown
     // Добавление ж\д ветки в б\д
@@ -881,11 +887,12 @@ public class AdminPage extends JDialog {
             float distance = Float.parseFloat(distanceBox.getText());
             RailwaySystem branch = new RailwaySystem(in,out,distance);
             handle.addRailwaySystem(branch);
-            this.refreshRoutePanel();
-            this.messageLbl.setText("Ж/Д ветка успешно добавлена");
+            this.routeStationsPnl.setRailwaySystem(handle.getRailwaySystem());
+            //this.refreshRoutePanel();
+            this.showMessage("Ж/Д ветка успешно добавлена","",false);
         }
         catch (Throwable exc) {
-            this.messageLbl.setText(exc.getMessage());
+            this.showMessage(exc.getMessage(),"",true);
         }
     }//GEN-LAST:event_addBranchBtnActionPerformed
 
@@ -895,11 +902,11 @@ public class AdminPage extends JDialog {
     // добавление нового маршрута в б\д
     private void addRouteNodeBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addRouteNodeBtnActionPerformed
         try {
-            this.routeStationsPnl.addNode(true);
+            this.routeStationsPnl.addNode(null, true);
             this.validate();
         }
         catch (Throwable exc) {
-            this.messageLbl.setText(exc.getMessage());
+            this.showMessage(exc.getMessage(),"",true);
         }
     }//GEN-LAST:event_addRouteNodeBtnActionPerformed
     // нажатие кнопки удаления узла маршрута
@@ -909,7 +916,7 @@ public class AdminPage extends JDialog {
             this.validate();
         }
         catch (Throwable exc) {
-            this.messageLbl.setText(exc.getMessage());
+            this.showMessage(exc.getMessage(),"",true);
         }
     }//GEN-LAST:event_RemoveRouteNodeBtnActionPerformed
     // нажатие кнопки добавления узла маршрута
@@ -920,20 +927,19 @@ public class AdminPage extends JDialog {
             handle.addRoute(route);
             routeCombo.addItem(route);
             scheduleRouteCombo.addItem(route);
-            this.messageLbl.setText("Маршрут успешно добавлен");
+            this.showMessage("Маршрут успешно добавлен","",false);
         }
         catch (Throwable exc) {
-            this.messageLbl.setText(exc.getMessage());
+            this.showMessage(exc.getMessage(),"",true);
         }
     }//GEN-LAST:event_addRouteBtnActionPerformed
     // нажатие кнопки сохранения выбранных узлов маршрута
     private void saveRouteStationsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveRouteStationsBtnActionPerformed
         try {
             this.handle.resetRouteStations(this.routeStationsPnl.getRouteStations());
-            
         } 
         catch (Throwable exc) {
-            this.messageLbl.setText(exc.getMessage());
+            this.showMessage(exc.getMessage(),"",true);
         }
     }//GEN-LAST:event_saveRouteStationsBtnActionPerformed
 
@@ -946,7 +952,7 @@ public class AdminPage extends JDialog {
             Route selected = (Route)this.routeCombo.getSelectedItem();
             this.routeStationsPnl.setRoute(selected);
         } catch (ParseException ex) {
-            System.out.println(ex.getMessage());
+            this.showMessage(ex.getMessage(),"",true);
         }
     }//GEN-LAST:event_routeComboActionPerformed
 
@@ -963,10 +969,10 @@ public class AdminPage extends JDialog {
             schedule.setPricePerKm(Float.parseFloat(this.pricePerKmBox.getText()));
             schedule.setDepartureTime(trainDepBox.getDateTime());
             handle.addSchedule(schedule);
-            this.messageLbl.setText("Отправление успешно добавлено");
+            this.showMessage("Отправление успешно добавлено","",false);
         }
         catch (Throwable exc) {
-            this.messageLbl.setText(exc.getMessage());
+            this.showMessage(exc.getMessage(),"",true);
         }
     }//GEN-LAST:event_addScheduleBtnActionPerformed
     // открытие модального окна показа существующих маршрутов
@@ -977,40 +983,56 @@ public class AdminPage extends JDialog {
         routes.dispose(); 
     }//GEN-LAST:event_showRoutesBtnActionPerformed
 
+    private void showRoutesBtn1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showRoutesBtn1ActionPerformed
+        this.routeStationsPnl.removeAllNodes();
+        this.validate();
+    }//GEN-LAST:event_showRoutesBtn1ActionPerformed
+
     /**
      * Обновление всех данных окна
      */
+    private void loadTrainTypes() {
+        List<TrainType> trainTypes = handle.getTrainTypes();
+        for (TrainType type: trainTypes) {
+            this.trainTypeCombo.addItem(type);
+        }
+    }
+    private void loadInOutStations() {
+        this.inStationCombo.removeAllItems();
+        this.outStationCombo.removeAllItems();
+        List<Station> stations = handle.getStations();
+        for (Station station: stations) {
+            this.inStationCombo.addItem(station);
+            this.outStationCombo.addItem(station);
+        }
+    }
+    private void loadRouteTrains() {
+        this.routeTrainCombo.removeAllItems();
+        List<Train> trains = handle.getTrains();
+        for (Train train: trains) {
+            this.routeTrainCombo.addItem(train);
+        }
+    }
+    private void loadRouteList() {
+        this.routeCombo.removeAllItems();
+        this.scheduleRouteCombo.removeAllItems();
+        List<Route> routes = handle.getRoutes();
+        for (Route route: routes) {
+            this.routeCombo.addItem(route);
+            this.scheduleRouteCombo.addItem(route);
+        }
+    }
     private void refreshData() {
         try {
             this.trainTypeCombo.removeAllItems();
-            System.out.println("refreshing data...");
-            List<TrainType> trainTypes = handle.getTrainTypes();
-            for (TrainType type: trainTypes) {
-                this.trainTypeCombo.addItem(type);
-            }
-            this.inStationCombo.removeAllItems();
-            this.outStationCombo.removeAllItems();
-            List<Station> stations = handle.getStations();
-            for (Station station: stations) {
-                this.inStationCombo.addItem(station);
-                this.outStationCombo.addItem(station);
-            }
-            this.routeTrainCombo.removeAllItems();
-            List<Train> trains = handle.getTrains();
-            for (Train train: trains) {
-                this.routeTrainCombo.addItem(train);
-            }
-            this.routeCombo.removeAllItems();
-            this.scheduleRouteCombo.removeAllItems();
-            List<Route> routes = handle.getRoutes();
-            for (Route route: routes) {
-                this.routeCombo.addItem(route);
-                this.scheduleRouteCombo.addItem(route);
-            }
-            System.out.println("Refreshing is successful");
+            loadTrainTypes();
+            loadInOutStations();
+            loadRouteTrains();
+            loadRouteList();
         }
         catch (Throwable exc) {
-            this.messageLbl.setText(exc.getMessage());
+            this.traceAllErrors(exc);
+            showMessage("Ошибка при обновлении","",true);
         }
     }
     // обновление панели резактирования маршрута
@@ -1023,7 +1045,18 @@ public class AdminPage extends JDialog {
             this.routeStationsPanel.validate();
         }
     }
-    
+    private void showMessage(String message, String title,boolean isError) {
+        int dialogType = isError ? JOptionPane.ERROR_MESSAGE : JOptionPane.INFORMATION_MESSAGE;
+        JOptionPane.showMessageDialog(this, message, title, dialogType);
+    }
+    private void traceAllErrors(Throwable exc) {
+        for (int i=0; i<10; i++) {
+                System.out.println("Error: "+exc.getMessage());
+                exc = exc.getCause();
+                if (exc==null)
+                    break;
+            }
+    } 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton RemoveRouteNodeBtn;
@@ -1063,7 +1096,6 @@ public class AdminPage extends JDialog {
     private javax.swing.JPanel jPanel8;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton loginBtn;
-    private javax.swing.JLabel messageLbl;
     private javax.swing.JComboBox<Station> outStationCombo;
     private javax.swing.JTextField priceCoeffBox;
     private javax.swing.JTextField pricePerKmBox;
@@ -1073,6 +1105,7 @@ public class AdminPage extends JDialog {
     private javax.swing.JButton saveRouteStationsBtn;
     private javax.swing.JComboBox<Route> scheduleRouteCombo;
     private javax.swing.JButton showRoutesBtn;
+    private javax.swing.JButton showRoutesBtn1;
     private javax.swing.JTextField stationNameBox;
     private javax.swing.JButton stationNameBtn;
     private javax.swing.JTextField trainCapacityBox;
