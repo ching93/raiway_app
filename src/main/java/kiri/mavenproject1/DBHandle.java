@@ -14,11 +14,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+import javax.mail.Authenticator;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import kiri.mavenproject1.entities.*;
+import javax.mail.Message;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 /**
  *
  * Класс для работы с б\д
@@ -42,6 +49,7 @@ public class DBHandle {
         try {
             System.out.println(properties.toString());
             managerFactory = Persistence.createEntityManagerFactory("railway_oracle",properties);
+            System.out.println("Manager created");
             setUser();
         }
         catch (Throwable exc) {
@@ -73,12 +81,9 @@ public class DBHandle {
             props.put("username", currentUser.getLogin());
             props.put("password", currentUser.getPassword());
         }
-        Object prop = properties.getOrDefault("ip",null);
-        if (prop != null)
-            props.put("ip", prop);
-        prop = properties.getOrDefault("port",null);
-        if (prop != null)
-            props.put("port", prop);
+        for (Object key: properties.keySet())
+            if (key!="javax.persistence.jdbc.url")
+                props.put(key, properties.get(key));
         props.storeToXML(new FileOutputStream(property_path),"my properties");
     }
     /**
@@ -89,12 +94,8 @@ public class DBHandle {
         Properties props = new Properties();
         InputStream is = (InputStream)(new FileInputStream(property_path));
         props.loadFromXML(is);
-        Object prop = props.getOrDefault("user",null);
-        if (prop != null)
-            properties.put("username", prop);
-        prop = props.getOrDefault("password",null);
-        if (prop != null)
-            properties.put("password", prop);
+        for (Object key: props.keySet())
+            properties.put(key, props.get(key));
         String ip = (String)props.getOrDefault("ip",null);
         String port = (String)props.getOrDefault("port",null);
         if (ip != null && port != null)
@@ -114,6 +115,7 @@ public class DBHandle {
             setUser();
             if (currentUser==null)
                 throw new IllegalArgumentException("Некорректный логин или пароль");
+            this.isLogged = true;
             if (save)
                 saveProperties();
         }
@@ -122,6 +124,10 @@ public class DBHandle {
         }
         return true;
     }
+    public void logOut() {
+        currentUser=null;
+        isLogged = false;
+    }
     /**
      * Авторизация пользователя
      */
@@ -129,9 +135,59 @@ public class DBHandle {
         System.out.println(properties.toString());
         EntityManager manager = managerFactory.createEntityManager();
         Query query = manager.createQuery("SELECT u FROM User u WHERE u.login=:username AND u.password=:password");
-        query.setParameter("username", properties.get("username"));
-        query.setParameter("password", properties.get("password"));
+        query.setParameter("username", (String)properties.get("username"));
+        query.setParameter("password", (String)properties.get("password"));
+        System.out.println(query.toString());
         currentUser = (User)query.getSingleResult();
+        System.out.println(currentUser.toString());
+    }
+    
+    public void restorePassword(String username) {
+        User user;
+        try {
+            EntityManager manager = managerFactory.createEntityManager();
+            Query q = manager.createQuery("select u from User u where login=:username");
+            q.setParameter("username", username);
+            user = (User)q.getSingleResult();
+        }
+        catch (Throwable exc) {
+            System.out.println("Can't create query to DB");
+            throw new IllegalArgumentException("Нет такого пользователя");
+        }
+        String message_body = "Ваш пароль: "+user.getPassword();
+        System.out.println(message_body);
+        String mail_login = (String)properties.getOrDefault("mail_login",null);
+        String mail_password = (String)properties.getOrDefault("mail_password",null);
+        if (mail_login==null || mail_password==null)
+            throw new IllegalArgumentException("Нет логина или пароли почты");
+        System.out.println(mail_login);
+        System.out.println(mail_password);
+        String host = "smtp.gmail.com";
+        Properties props = new Properties();
+        props.put("mail.smtp.host", host);
+        props.put("mail.smtp.auth","true");
+        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.port", "587");
+        System.out.println(props.toString());
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(mail_login, mail_password);
+            }
+        });
+        try {
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(mail_login,mail_password));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(user.getEmail()));
+            message.setSubject("Восстановление пароля (Railway Application)");
+            message.setText(message_body);
+            Transport.send(message);
+        }
+        catch (Throwable exc) {
+            System.out.println(exc.getMessage());
+            throw new IllegalArgumentException("Ошибка при отправлении сообщения");
+        }
     }
     /**
      * Добавление нового пользователя

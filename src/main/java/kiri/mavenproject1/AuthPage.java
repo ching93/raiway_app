@@ -8,6 +8,7 @@ package kiri.mavenproject1;
 import java.awt.Dialog;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -45,6 +46,7 @@ public class AuthPage extends javax.swing.JDialog {
         okBtn = new javax.swing.JButton();
         cancelBtn = new javax.swing.JButton();
         saveChkBox = new javax.swing.JCheckBox();
+        okBtn1 = new javax.swing.JButton();
 
         setTitle("Аутентификация");
 
@@ -69,6 +71,13 @@ public class AuthPage extends javax.swing.JDialog {
         saveChkBox.setSelected(true);
         saveChkBox.setText("Сохранить");
 
+        okBtn1.setText("<html>Восст.<br>пароль</html>");
+        okBtn1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                okBtn1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -76,7 +85,10 @@ public class AuthPage extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(saveChkBox)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(saveChkBox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(okBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(loginBox, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1)
                     .addComponent(passwordBox, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -85,7 +97,7 @@ public class AuthPage extends javax.swing.JDialog {
                         .addComponent(cancelBtn)
                         .addGap(20, 20, 20)
                         .addComponent(okBtn)))
-                .addContainerGap(29, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -103,7 +115,9 @@ public class AuthPage extends javax.swing.JDialog {
                     .addComponent(okBtn)
                     .addComponent(cancelBtn))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(saveChkBox)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(okBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(saveChkBox))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -125,6 +139,17 @@ public class AuthPage extends javax.swing.JDialog {
         this.getParent().remove(this);
     }//GEN-LAST:event_cancelBtnActionPerformed
 
+    private void okBtn1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okBtn1ActionPerformed
+        try {
+            String username = this.loginBox.getText();
+            this.handle.restorePassword(username);
+            JOptionPane.showMessageDialog(this, "Пароль отправлен на ваш почтовый адрес", "Восстановление пароли", JOptionPane.PLAIN_MESSAGE);
+        }
+        catch (Throwable exc) {
+            JOptionPane.showMessageDialog(this, "Ошибка при отправке сообщения", "Восстановление пароли", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_okBtn1ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -136,6 +161,7 @@ public class AuthPage extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JTextField loginBox;
     private javax.swing.JButton okBtn;
+    private javax.swing.JButton okBtn1;
     private javax.swing.JTextField passwordBox;
     private javax.swing.JCheckBox saveChkBox;
     // End of variables declaration//GEN-END:variables

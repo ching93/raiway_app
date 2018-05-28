@@ -89,6 +89,6 @@ public class User {
     }
     @Override
     public String toString() {
-        return firstname+" "+lastname;
+        return login+": "+firstname+" "+lastname;
     }
 }

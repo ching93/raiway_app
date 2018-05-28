@@ -16,7 +16,7 @@ public class Main {
         try {
             DBHandle h = new DBHandle();
             TicketPage jf = new TicketPage(h);
-            jf.show();
+            jf.setVisible(true);
         }
         catch (Throwable exc) {
             for (int i=0; i<10; i++) {

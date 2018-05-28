@@ -26,7 +26,11 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="saveChkBox" min="-2" max="-2" attributes="0"/>
+                  <Group type="102" attributes="0">
+                      <Component id="saveChkBox" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Component id="okBtn1" min="-2" pref="69" max="-2" attributes="0"/>
+                  </Group>
                   <Component id="loginBox" min="-2" pref="159" max="-2" attributes="0"/>
                   <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
                   <Component id="passwordBox" alignment="0" min="-2" pref="159" max="-2" attributes="0"/>
@@ -37,7 +41,7 @@
                       <Component id="okBtn" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace pref="29" max="32767" attributes="0"/>
+              <EmptySpace max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -58,7 +62,10 @@
                   <Component id="cancelBtn" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Component id="saveChkBox" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="okBtn1" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="saveChkBox" min="-2" max="-2" attributes="0"/>
+              </Group>
               <EmptySpace max="32767" attributes="0"/>
           </Group>
       </Group>
@@ -100,6 +107,14 @@
         <Property name="selected" type="boolean" value="true"/>
         <Property name="text" type="java.lang.String" value="&#x421;&#x43e;&#x445;&#x440;&#x430;&#x43d;&#x438;&#x442;&#x44c;"/>
       </Properties>
+    </Component>
+    <Component class="javax.swing.JButton" name="okBtn1">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="&lt;html&gt;&#x412;&#x43e;&#x441;&#x441;&#x442;.&lt;br&gt;&#x43f;&#x430;&#x440;&#x43e;&#x43b;&#x44c;&lt;/html&gt;"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="okBtn1ActionPerformed"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>
