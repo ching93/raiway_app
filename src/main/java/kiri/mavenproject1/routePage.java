@@ -59,7 +59,10 @@ public class routePage extends JDialog {
         }
         @Override
         public int getColumnCount() {
-            return 5;
+            if (type==0)
+                return 5;
+            else
+                return 4;
         }
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {

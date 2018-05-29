@@ -143,10 +143,10 @@ public class AuthPage extends javax.swing.JDialog {
         try {
             String username = this.loginBox.getText();
             this.handle.restorePassword(username);
-            JOptionPane.showMessageDialog(this, "Пароль отправлен на ваш почтовый адрес", "Восстановление пароли", JOptionPane.PLAIN_MESSAGE);
+            Utils.showMessage(this, "Пароль отправлен на ваш почтовый адрес", "Восстановление пароли", false);
         }
         catch (Throwable exc) {
-            JOptionPane.showMessageDialog(this, "Ошибка при отправке сообщения", "Восстановление пароли", JOptionPane.ERROR_MESSAGE);
+            Utils.showMessage(this, "Ошибка при отправке сообщения", "Восстановление пароли", true);
         }
     }//GEN-LAST:event_okBtn1ActionPerformed
 

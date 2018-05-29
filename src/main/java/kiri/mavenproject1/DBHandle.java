@@ -124,6 +124,12 @@ public class DBHandle {
         }
         return true;
     }
+    private void checkUserRights(int rightToBe) {
+        if (currentUser==null)
+                throw new IllegalArgumentException("Не выполнен вход");
+        else if (currentUser.getRole().getId()>rightToBe)
+                throw new IllegalArgumentException("Недостаточно прав");
+    }
     public void logOut() {
         currentUser=null;
         isLogged = false;
@@ -141,7 +147,9 @@ public class DBHandle {
         currentUser = (User)query.getSingleResult();
         System.out.println(currentUser.toString());
     }
-    
+    public User getCurrentUser() {
+        return this.currentUser;
+    }
     public void restorePassword(String username) {
         User user;
         try {
@@ -194,8 +202,7 @@ public class DBHandle {
      * @param user 
      */
     public void addNewUser(User user) {
-        if (currentUser.getRole().getId()!=1 && user.getRole().getId()==1)
-            throw new IllegalArgumentException("Пользователь должен быть администратором для этого действия");
+        checkUserRights(3);
         EntityManager manager = managerFactory.createEntityManager();
         manager.getTransaction().begin();
         manager.persist(user);
@@ -210,6 +217,29 @@ public class DBHandle {
             return currentUser.getRole();
         else
             return null;
+    }
+    public void removeUser(User user) {
+        checkUserRights(1);
+        EntityManager manager = managerFactory.createEntityManager();
+        manager.getTransaction().begin();
+        Query q = manager.createQuery("delete from User u where u.id=:user_id");
+        q.setParameter("user_id", user.getId());
+        q.executeUpdate();
+        manager.getTransaction().commit();
+    }
+    public List<User> getUsers() {
+        checkUserRights(1);
+        EntityManager manager = managerFactory.createEntityManager();
+        Query q = manager.createQuery("select u from User u");
+        List<User> result = q.getResultList();
+        return result;
+    }
+    public void updateEntity(Object entity) {
+        checkUserRights(2);
+        EntityManager manager = managerFactory.createEntityManager();
+        manager.getTransaction().begin();
+        manager.merge(entity);
+        manager.getTransaction().commit();
     }
     /**
      * Загрузить все существующие роли
@@ -229,8 +259,7 @@ public class DBHandle {
      * @param e 
      */
     private void InsertEntity(Object e) {
-        if (currentUser == null || currentUser.getRole().getId()!=1)
-            throw new IllegalArgumentException("Недостаточно прав");
+        checkUserRights(2);
         EntityManager manager = managerFactory.createEntityManager();
         manager.getTransaction().begin();
         manager.persist(e);
@@ -242,8 +271,7 @@ public class DBHandle {
      * @param ee 
      */
     private void InsertBatchEntities(List<Object> ee) {
-        if (currentUser == null || currentUser.getRole().getId()!=1)
-            throw new IllegalArgumentException("Недостаточно прав");
+        checkUserRights(2);
         EntityManager manager = managerFactory.createEntityManager();
         try {
             manager.getTransaction().begin();
@@ -267,6 +295,7 @@ public class DBHandle {
      * @param ee 
      */
     public void resetRouteStations(List<Object> ee) {
+        checkUserRights(2);
         // Проверка на цикличность маршрута
         for (int i=1; i<ee.size(); i++) {
             RouteStation rs = (RouteStation)ee.get(i);
@@ -276,6 +305,8 @@ public class DBHandle {
                     throw new IllegalArgumentException("Циклический маршрут");
             }
         }
+        EntityManager manager = managerFactory.createEntityManager();
+        manager.getTransaction().begin();
         // Заполняем поле пути до станции от начачальной точки маршрута
         List<RailwaySystem> branches = this.getRailwaySystem();
         RouteStation prevRs = (RouteStation)ee.get(0);
@@ -288,17 +319,15 @@ public class DBHandle {
             prevRs = rs;
         }
         // Удаляем записанную в базе данных маршрут
-        EntityManager manager = managerFactory.createEntityManager();
         RouteStation rs = (RouteStation)ee.get(0);
         int route_id = rs.getRoute().getId();
-        manager.getTransaction().begin();
         String sql = "DELETE FROM RouteStation rs WHERE rs.route.id='"+route_id+"'";
         System.out.println(sql);
         Query query = manager.createQuery(sql);
         int rows = query.executeUpdate();
+        manager.clear();
         System.out.println("deleted "+rows+" rows");
         manager.getTransaction().commit();
-        manager.clear();
         // Вставляем вычисленный маршрут
         InsertBatchEntities(ee);
     }
@@ -307,8 +336,10 @@ public class DBHandle {
      * Перед добавлением добавляются строки в TicketPerBranch для всех узлов, входящих в маршрут
      * Для упрощения дальнейших запросов пересохраняем расстояния до узла в таблицу TicketPerBranch
      * @param schedule 
+     * TODO проверка на возможность отправления по времени
      */
     public void addSchedule(Schedule schedule) {
+        checkUserRights(2);
         EntityManager manager = managerFactory.createEntityManager();
         manager.getTransaction().begin();
         try {
@@ -365,6 +396,7 @@ public class DBHandle {
         throw new IllegalArgumentException("Несуществующая ветка");
     }
     public List<TrainType> getTrainTypes() {
+        checkUserRights(2);
         EntityManager manager = managerFactory.createEntityManager();
         manager.getTransaction().begin();
         Query query = manager.createQuery("SELECT tt FROM TrainType tt");
@@ -373,6 +405,7 @@ public class DBHandle {
         return result;
     }
     public void addTrainType(TrainType trainType) {
+        checkUserRights(2);
         this.InsertEntity(trainType);
     }
     public List<Station> getStations() {
@@ -429,6 +462,7 @@ public class DBHandle {
         return result;
     }
     public List<RouteStation> getFirstLastRouteStations() {
+        checkUserRights(2);
         EntityManager manager = managerFactory.createEntityManager();
         String sqlFirsts = "select rs from RouteStation rs where rs.stationOrder=1";
         Query q = manager.createQuery(sqlFirsts);
@@ -445,8 +479,7 @@ public class DBHandle {
      * @return 
      */
     public List<RouteStation> getRouteStations() {
-        if (currentUser==null || currentUser.getRole().getId()!=1)
-            return null;
+        checkUserRights(2);
         EntityManager manager = managerFactory.createEntityManager();
         Query query = manager.createQuery("SELECT rs FROM RouteStation rs order by rs.stationOrder");
         List<RouteStation> result = query.getResultList();
@@ -457,6 +490,7 @@ public class DBHandle {
      * @return 
      */
     public List<RailwaySystem> getRailwaySystem() {
+        checkUserRights(2);
         EntityManager manager = managerFactory.createEntityManager();
         manager.getTransaction().begin();
         Query query = manager.createQuery("SELECT rs FROM RailwaySystem rs");

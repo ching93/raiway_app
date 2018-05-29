@@ -65,7 +65,6 @@ public class signInPage extends JDialog {
         emailBox = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
         roleBox = new javax.swing.JComboBox<>();
-        messageLbl = new javax.swing.JLabel();
 
         setTitle("Регистрация");
 
@@ -104,7 +103,6 @@ public class signInPage extends JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(messageLbl, javax.swing.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
                     .addComponent(lastnameBox, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(firstnameBox, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
@@ -154,15 +152,13 @@ public class signInPage extends JDialog {
                 .addComponent(emailBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel7)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 16, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(roleBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(okBtn)
                     .addComponent(cancelBtn))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(messageLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addGap(38, 38, 38))
         );
 
         pack();
@@ -201,16 +197,12 @@ public class signInPage extends JDialog {
         try {
             User user = getUser();
             handle.addNewUser(user);
-            this.messageLbl.setText("Пользователь успешно добавлен");
+            Utils.showMessage(this,"Пользователь успешно добавлен","",false);
+            this.setVisible(false);
         }
         catch (Throwable exc) {
-            this.messageLbl.setText(exc.getMessage());
-            for (int i=0; i<10; i++) {
-                System.out.println("Error: "+exc.getMessage());
-                exc = exc.getCause();
-                if (exc==null)
-                    break;
-            }
+            Utils.showMessage(this,exc.getMessage(),"",true);
+            Utils.traceAllErrors(exc);
         }
     }//GEN-LAST:event_okBtnActionPerformed
 
@@ -228,7 +220,6 @@ public class signInPage extends JDialog {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JTextField lastnameBox;
     private javax.swing.JTextField loginBox;
-    private javax.swing.JLabel messageLbl;
     private javax.swing.JButton okBtn;
     private javax.swing.JTextField passwordBox;
     private javax.swing.JTextField passwordRepeatBox;

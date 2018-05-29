@@ -115,8 +115,11 @@ public class TicketPage extends JFrame {
         rightBorderBox.setDateTime(LocalDateTime.now().plus(Duration.ofDays(5)));
         this.rightBorderPnl.add(rightBorderBox);
         this.rightBorderPnl.validate();
-        if (handle.isLogged())
-            this.logOutBtn.setEnabled(false);
+        if (handle.isLogged()) {
+            this.logOutBtn.setEnabled(true);
+            User current = handle.getCurrentUser();
+            this.userDataLbl.setText("Текущий пользователь: "+current.getLogin());
+        }
         try {
             Role userRole = handle.getUserRole();
             if (userRole!=null & userRole.getId()==1)
@@ -171,6 +174,7 @@ public class TicketPage extends JFrame {
         adminPageBtn = new javax.swing.JButton();
         signInBtn = new javax.swing.JButton();
         logInBtn = new javax.swing.JButton();
+        userDataLbl = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Покупка билета");
@@ -279,8 +283,7 @@ public class TicketPage extends JFrame {
                                         .addComponent(rightBorderPnl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addComponent(leftBorderPnl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addComponent(jLabel5))))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                        .addGap(0, 0, Short.MAX_VALUE))))
         );
 
         buyBtn1.setText("Купить");
@@ -311,7 +314,6 @@ public class TicketPage extends JFrame {
         jScrollPane2.setViewportView(jScrollPane1);
 
         logOutBtn.setText("Выйти");
-        logOutBtn.setEnabled(false);
         logOutBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 logOutBtnActionPerformed(evt);
@@ -351,7 +353,8 @@ public class TicketPage extends JFrame {
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                         .addComponent(buyBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 212, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 953, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(messageLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 727, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(messageLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 727, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(userDataLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 624, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(logInBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -368,14 +371,18 @@ public class TicketPage extends JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
                         .addComponent(logInBtn)
                         .addGap(18, 18, 18)
-                        .addComponent(signInBtn))
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                        .addComponent(signInBtn)
+                        .addGap(29, 29, 29))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(userDataLbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(adminPageBtn, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -444,6 +451,7 @@ public class TicketPage extends JFrame {
     private void logOutBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logOutBtnActionPerformed
         handle.logOut();
         JOptionPane.showMessageDialog(this, "Вы вышли из профиля", "Выход из профиля", JOptionPane.INFORMATION_MESSAGE);
+        this.logOutBtn.setEnabled(false);
     }//GEN-LAST:event_logOutBtnActionPerformed
 
     private void signInBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_signInBtnActionPerformed
@@ -455,9 +463,9 @@ public class TicketPage extends JFrame {
     private void logInBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logInBtnActionPerformed
         this.logIn();
         if (handle.isLogged())
-            this.logOutBtn.setEnabled(false);
-        else
             this.logOutBtn.setEnabled(true);
+        else
+            this.logOutBtn.setEnabled(false);
     }//GEN-LAST:event_logInBtnActionPerformed
     
     private void logIn() {
@@ -469,11 +477,12 @@ public class TicketPage extends JFrame {
                 this.showStations();
                 if (handle.getUserRole().getId()==1)
                     this.adminPageBtn.setEnabled(true);
-                else this.adminPageBtn.setEnabled(false);
-                this.messageLbl.setText("Вы успешно вошли");
+                else
+                    this.adminPageBtn.setEnabled(false);
+                Utils.showMessage(this,"Вы успешно вошли","",false);
             }
             else
-                this.messageLbl.setText("Неправильный логин или пароль");
+                Utils.showMessage(this,"Неправильный логин или пароль","",true);
         }
         catch (Throwable exc) {
             this.messageLbl.setText(exc.getMessage());
@@ -502,5 +511,6 @@ public class TicketPage extends JFrame {
     private javax.swing.JTable resultTable;
     private javax.swing.JPanel rightBorderPnl;
     private javax.swing.JButton signInBtn;
+    private javax.swing.JLabel userDataLbl;
     // End of variables declaration//GEN-END:variables
     }
