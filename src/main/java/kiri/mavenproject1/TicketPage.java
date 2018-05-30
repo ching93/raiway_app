@@ -127,13 +127,8 @@ public class TicketPage extends JFrame {
             showStations();
         }
         catch (Throwable exc) {
-            this.messageLbl.setText(exc.getMessage());
-            for (int i=0; i<10; i++) {
-                System.out.println("Error: "+exc.getMessage());
-                exc = exc.getCause();
-                if (exc==null)
-                    break;
-            }
+            Utils.showMessage(this, exc.getMessage(), "", true);
+            Utils.traceAllErrors(exc);
         }        
     }
     private void showStations() {
@@ -402,37 +397,42 @@ public class TicketPage extends JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void applyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_applyBtnActionPerformed
+          showAvailableRoutes();
+    }//GEN-LAST:event_applyBtnActionPerformed
+    
+    private void showAvailableRoutes() {
         Station depStation = (Station)this.depStationCombo.getSelectedItem();                                      
         Station arrStation = (Station)this.arrStationCombo.getSelectedItem();
         LocalDateTime leftBorder = this.leftBorderBox.getDateTime();
         LocalDateTime rightBorder = this.rightBorderBox.getDateTime();
-        List<PrepareTicketResult> result = handle.prepareBuyTicket(depStation, arrStation, leftBorder, rightBorder);
-        if (result == null || result.size()==0) {
-            this.messageLbl.setText("Не найдено отправлений с заданными параметрами");
-            return;
+        try {
+            List<PrepareTicketResult> result = handle.prepareBuyTicket(depStation, arrStation, leftBorder, rightBorder);
+            if (result == null || result.size()==0)
+                Utils.showMessage(this,"Не найдено отправлений с заданными параметрами","",true);
+            else {
+                ResultTableModel model = new ResultTableModel(result);
+                this.resultTable.setModel(model);
+                this.resultTable.validate();
+            }
         }
-        ResultTableModel model = new ResultTableModel(result);
-        this.resultTable.setModel(model);
-        this.resultTable.validate();
-    }//GEN-LAST:event_applyBtnActionPerformed
-
+        catch (Throwable exc) {
+            Utils.showMessage(this, exc.getMessage(), "", true);
+            Utils.traceAllErrors(exc);
+        }
+    }
+    
     private void buyBtn1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buyBtn1ActionPerformed
         PrepareTicketResult result = ((ResultTableModel)this.resultTable.getModel()).getSelectedResult();
         if (result == null)
-            this.messageLbl.setText("Не выбрано значение");
+            Utils.showMessage(this,"Не выбрано значение","",true);
         else
             try {
                 handle.buyTicket(result);
-                this.messageLbl.setText("Билет успешно куплен");
+                Utils.showMessage(this,"Билет успешно куплен","",false);
             }
         catch (Throwable exc) {
-            this.messageLbl.setText(exc.getMessage());
-            for (int i=0; i<10; i++) {
-                System.out.println("Error: "+exc.getMessage());
-                exc = exc.getCause();
-                if (exc==null)
-                    break;
-            }
+            Utils.showMessage(this, exc.getMessage(), "", true);
+            Utils.traceAllErrors(exc);
         }
             
     }//GEN-LAST:event_buyBtn1ActionPerformed
@@ -450,7 +450,7 @@ public class TicketPage extends JFrame {
 
     private void logOutBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logOutBtnActionPerformed
         handle.logOut();
-        JOptionPane.showMessageDialog(this, "Вы вышли из профиля", "Выход из профиля", JOptionPane.INFORMATION_MESSAGE);
+        Utils.showMessage(this, "Вы вышли из профиля", "Выход из профиля", false);
         this.logOutBtn.setEnabled(false);
     }//GEN-LAST:event_logOutBtnActionPerformed
 
@@ -462,10 +462,15 @@ public class TicketPage extends JFrame {
 
     private void logInBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logInBtnActionPerformed
         this.logIn();
-        if (handle.isLogged())
+        if (handle.isLogged()) {
             this.logOutBtn.setEnabled(true);
-        else
+            this.userDataLbl.setText("Текущий пользователь "+handle.getCurrentUser().getLogin());
+        }
+        else {
             this.logOutBtn.setEnabled(false);
+            this.userDataLbl.setText("");
+            ResultTableModel model = (ResultTableModel)this.resultTable.getModel();
+        }
     }//GEN-LAST:event_logInBtnActionPerformed
     
     private void logIn() {

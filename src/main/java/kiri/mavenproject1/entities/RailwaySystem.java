@@ -39,6 +39,12 @@ public class RailwaySystem {
         this.out_station = out;
         this.distance = dist;
     }
+    public void setId(int id) {
+        this.id = id;
+    }
+    public int getId() {
+        return id;
+    }
     public void setDistance(float distance) {
         this.distance = distance;
     }

@@ -5,17 +5,45 @@
  */
 package kiri.mavenproject1;
 
+import java.util.List;
+import java.util.regex.*;
+import javax.swing.JDialog;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
 /**
  *
  * @author User
  */
-public class CustomQueryPage extends javax.swing.JFrame {
-
+public class CustomQueryPage extends JDialog {
+    DBHandle handle;
+    private String[] entityTypes = new String[] {"Station","Train", "Ticket"};
+    private enum EntityTypeEnum {STATION, TRAIN, TICKET };
+    private EntityTypeEnum entityType = EntityTypeEnum.STATION;
+    class CustomTableModel extends AbstractTableModel {
+        private List<Object[]> objects;
+        public CustomTableModel(List<Object[]> objects) {
+            this.objects = objects;
+        }
+        @Override
+        public int getRowCount() {
+            return objects.size();
+        }
+        @Override
+        public int getColumnCount() {
+            return objects.get(0).length;
+        }
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            return objects.get(rowIndex)[columnIndex];
+        }
+    }
     /**
      * Creates new form CustomQueryPage
      */
-    public CustomQueryPage() {
+    public CustomQueryPage(DBHandle handle, JDialog owner) {
+        super(owner, JDialog.ModalityType.DOCUMENT_MODAL);
         initComponents();
+        this.handle = handle;
     }
 
     /**
@@ -27,15 +55,22 @@ public class CustomQueryPage extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        jPanel1 = new javax.swing.JPanel();
         executeBtn = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        resultTbl = new javax.swing.JTable();
+        queryBox = new javax.swing.JTextField();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        jLabel1.setText("Введите запрос:");
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 100, Short.MAX_VALUE)
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 100, Short.MAX_VALUE)
+        );
 
         executeBtn.setText("Выполнить запрос");
         executeBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -44,7 +79,7 @@ public class CustomQueryPage extends javax.swing.JFrame {
             }
         });
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        resultTbl.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -52,41 +87,31 @@ public class CustomQueryPage extends javax.swing.JFrame {
 
             }
         ));
-        jScrollPane1.setViewportView(jTable1);
+        jScrollPane1.setViewportView(resultTbl);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1066, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(26, 26, 26)
-                                .addComponent(jLabel1))
-                            .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 632, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(executeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jScrollPane1)))
+                        .addComponent(queryBox)
+                        .addGap(18, 18, 18)
+                        .addComponent(executeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(executeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(queryBox, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(executeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 428, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 539, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -94,15 +119,24 @@ public class CustomQueryPage extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void executeBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_executeBtnActionPerformed
-        
+        String q = this.queryBox.getText();
+        try {
+            List<Object[]> res = handle.performCustomQuery(q);
+            CustomTableModel model = new CustomTableModel(res);
+            this.resultTbl.setModel(model);
+        }
+        catch (Throwable exc) {
+            Utils.showMessage(this, exc.getMessage(), "", true);
+            Utils.traceAllErrors(exc);
+        }
     }//GEN-LAST:event_executeBtnActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton executeBtn;
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField queryBox;
+    private javax.swing.JTable resultTbl;
     // End of variables declaration//GEN-END:variables
 }

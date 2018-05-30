@@ -5,16 +5,10 @@
  */
 package kiri.mavenproject1;
 
-import java.awt.Component;
 import java.util.List;
-import javax.swing.DefaultCellEditor;
-import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellRenderer;
 import kiri.mavenproject1.entities.Role;
 import kiri.mavenproject1.entities.User;
 

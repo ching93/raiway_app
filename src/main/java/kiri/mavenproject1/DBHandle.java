@@ -26,6 +26,7 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.persistence.Parameter;
 /**
  *
  * Класс для работы с б\д
@@ -241,6 +242,17 @@ public class DBHandle {
         manager.merge(entity);
         manager.getTransaction().commit();
     }
+    public void updateEntities(Iterable<Object> entities) {
+        checkUserRights(2);
+        EntityManager manager = managerFactory.createEntityManager();
+        manager.getTransaction().begin();
+        for (Object entity: entities) {
+            manager.merge(entity);
+            System.out.println("Updated "+entity.toString());
+            manager.flush();
+        }
+        manager.getTransaction().commit();
+    }
     /**
      * Загрузить все существующие роли
      * @return 
@@ -254,9 +266,25 @@ public class DBHandle {
     public boolean isLogged() {
         return isLogged;
     }
+    public List<Object[]> performCustomQuery(String query) {
+        EntityManager manager = managerFactory.createEntityManager();
+        Query q = manager.createNativeQuery(query);
+        List<Object[]> result = q.getResultList();
+        return result;
+    }
+    public void removeEntities(Iterable<Object> entities) {
+        checkUserRights(2);
+        EntityManager manager = managerFactory.createEntityManager();
+        manager.getTransaction().begin();
+        for (Object e: entities) {
+            manager.remove(e);
+            manager.flush();
+        }
+        manager.getTransaction().commit();
+    }
     /**
      * Сохранение сущности в базу данных
-     * @param e 
+     * @param e - Entity
      */
     private void InsertEntity(Object e) {
         checkUserRights(2);
@@ -270,7 +298,7 @@ public class DBHandle {
      * Сохранение партии сущностей в б\д
      * @param ee 
      */
-    private void InsertBatchEntities(List<Object> ee) {
+    public void InsertBatchEntities(Iterable<Object> ee) {
         checkUserRights(2);
         EntityManager manager = managerFactory.createEntityManager();
         try {
@@ -279,7 +307,6 @@ public class DBHandle {
                 manager.persist(e);
                 System.out.println("Inserted "+e.toString());
                 manager.flush();
-                manager.clear();
             };
             manager.getTransaction().commit();
         }
