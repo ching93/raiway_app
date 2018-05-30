@@ -24,16 +24,15 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
-                  <Group type="103" alignment="0" groupAlignment="1" attributes="0">
-                      <Component id="buyBtn1" min="-2" pref="212" max="-2" attributes="0"/>
-                      <Component id="jScrollPane2" min="-2" pref="953" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="buyBtn1" min="-2" pref="212" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
+                      <Component id="jScrollPane2" alignment="0" min="-2" pref="953" max="-2" attributes="0"/>
+                      <Component id="userDataLbl" min="-2" pref="624" max="-2" attributes="0"/>
                   </Group>
-                  <Component id="messageLbl" alignment="0" min="-2" pref="727" max="-2" attributes="0"/>
-                  <Component id="userDataLbl" min="-2" pref="624" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
@@ -84,10 +83,7 @@
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="messageLbl" min="-2" pref="26" max="-2" attributes="0"/>
-                  <Component id="buyBtn1" min="-2" pref="30" max="-2" attributes="0"/>
-              </Group>
+              <Component id="buyBtn1" min="-2" pref="30" max="-2" attributes="0"/>
               <EmptySpace max="32767" attributes="0"/>
           </Group>
       </Group>
@@ -196,6 +192,9 @@
               <StringArray count="0"/>
             </Property>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="depStationComboActionPerformed"/>
+          </Events>
           <AuxValues>
             <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;Station&gt;"/>
           </AuxValues>
@@ -206,6 +205,9 @@
               <StringArray count="0"/>
             </Property>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="arrStationComboActionPerformed"/>
+          </Events>
           <AuxValues>
             <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;Station&gt;"/>
           </AuxValues>
@@ -287,12 +289,11 @@
     <Component class="javax.swing.JButton" name="buyBtn1">
       <Properties>
         <Property name="text" type="java.lang.String" value="&#x41a;&#x443;&#x43f;&#x438;&#x442;&#x44c;"/>
+        <Property name="enabled" type="boolean" value="false"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="buyBtn1ActionPerformed"/>
       </Events>
-    </Component>
-    <Component class="javax.swing.JLabel" name="messageLbl">
     </Component>
     <Container class="javax.swing.JScrollPane" name="jScrollPane2">
 

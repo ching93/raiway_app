@@ -29,7 +29,7 @@ public class signInPage extends JDialog {
     
     public void loadRoles() {
         Role currentRole = handle.getUserRole();
-        if (currentRole != null || currentRole.getId()==1) {
+        if (currentRole != null && currentRole.getId()==1) {
             this.roleBox.setEnabled(true);
             this.roleBox.removeAllItems();
             List<Role> roles = handle.getRoles();
