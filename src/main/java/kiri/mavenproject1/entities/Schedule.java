@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
 import java.util.Date;
+import javax.validation.constraints.NotNull;
 
 /**
  *
@@ -28,6 +29,9 @@ public class Schedule {
     private Route route = new Route();
     @Column(name="departureTime")
     private LocalDateTime departureTime;
+    @NotNull
+    @ManyToOne(cascade=CascadeType.REMOVE)
+    private Train train = new Train();
     @Column(name="delay")
     private Duration delay;
     @Column(name="pricePerKm")
@@ -44,6 +48,9 @@ public class Schedule {
     public void setId(int id) {
         this.id = id;
     }
+    public void setTrain(Train train) {
+        this.train = train;
+    }
     public void setDelay(Duration delay) {
         this.delay = delay;
     }
@@ -58,6 +65,9 @@ public class Schedule {
     }
     public Route getRoute() {
         return route;
+    }
+    public Train getTrain() {
+        return this.train;
     }
     public int getId() {
         return this.id;

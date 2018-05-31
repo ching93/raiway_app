@@ -13,13 +13,13 @@ import javax.persistence.Table;
  * @author User
  */
 @Entity
-@Table(name="Stations",uniqueConstraints=@UniqueConstraint(columnNames="name"))
+@Table(name="Stations")
 public class Station {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name="id")
     private int id;
-    @Column(name="name")
+    @Column(name="name",unique=true)
     private String name;
     public Station() {
         

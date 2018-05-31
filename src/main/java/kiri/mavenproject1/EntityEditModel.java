@@ -5,68 +5,166 @@
  */
 package kiri.mavenproject1;
 
+import java.awt.Component;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
+import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
 import kiri.mavenproject1.entities.*;
 
-enum EntityType {BRANCHES, STATIONS, TRAINS, ROUTES, TRAINTYPES, SCHEDULES, ROLES, CREWS };
+enum EntityType {BRANCHES, STATIONS, TRAINS, TRAINTYPES, SCHEDULES, ROLES, TRAINCREWS };
 /**
  *
  * @author User
  */
+class StationRenderer extends JComboBox implements TableCellRenderer {
+    public StationRenderer(Station[] items) {
+      super(items);
+    }
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+        boolean hasFocus, int row, int column) {
+        if (isSelected) {
+          setForeground(table.getSelectionForeground());
+          super.setBackground(table.getSelectionBackground());
+        } else {
+          setForeground(table.getForeground());
+          setBackground(table.getBackground());
+        }
+        setSelectedItem(value);
+        return this;
+      }
+}
+
+class TrainTypeRenderer extends JComboBox implements TableCellRenderer {
+    public TrainTypeRenderer(TrainType[] items) {
+      super(items);
+    }
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+        boolean hasFocus, int row, int column) {
+        if (isSelected) {
+          setForeground(table.getSelectionForeground());
+          super.setBackground(table.getSelectionBackground());
+        } else {
+          setForeground(table.getForeground());
+          setBackground(table.getBackground());
+        }
+        setSelectedItem(value);
+        return this;
+      }
+}
+class TrainRenderer extends JComboBox implements TableCellRenderer {
+    public TrainRenderer(Train[] items) {
+      super(items);
+    }
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+        boolean hasFocus, int row, int column) {
+        if (isSelected) {
+          setForeground(table.getSelectionForeground());
+          super.setBackground(table.getSelectionBackground());
+        } else {
+          setForeground(table.getForeground());
+          setBackground(table.getBackground());
+        }
+        setSelectedItem(value);
+        return this;
+      }
+}
+class UserRenderer extends JComboBox implements TableCellRenderer {
+    public UserRenderer(User[] items) {
+      super(items);
+    }
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+        boolean hasFocus, int row, int column) {
+        if (isSelected) {
+          setForeground(table.getSelectionForeground());
+          super.setBackground(table.getSelectionBackground());
+        } else {
+          setForeground(table.getForeground());
+          setBackground(table.getBackground());
+        }
+        setSelectedItem(value);
+        return this;
+      }
+}
+class RouteRenderer extends JComboBox implements TableCellRenderer {
+    public RouteRenderer(Route[] items) {
+      super(items);
+    }
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+        boolean hasFocus, int row, int column) {
+        if (isSelected) {
+          setForeground(table.getSelectionForeground());
+          super.setBackground(table.getSelectionBackground());
+        } else {
+          setForeground(table.getForeground());
+          setBackground(table.getBackground());
+        }
+        setSelectedItem(value);
+        return this;
+      }
+}
+
+class StationEditor extends DefaultCellEditor {
+    public StationEditor(Station[] items) {
+        super(new JComboBox(items));
+    }
+}
+class TrainTypeEditor extends DefaultCellEditor {
+    public TrainTypeEditor(TrainType[] items) {
+        super(new JComboBox(items));
+    }
+}
+class TrainEditor extends DefaultCellEditor {
+    public TrainEditor(Train[] items) {
+        super(new JComboBox(items));
+    }
+}
+class UserEditor extends DefaultCellEditor {
+    public UserEditor(User[] items) {
+        super(new JComboBox(items));
+    }
+}
+class RouteEditor extends DefaultCellEditor {
+    public RouteEditor(Route[] items) {
+        super(new JComboBox(items));
+    }
+}
+
 public class EntityEditModel extends AbstractTableModel  {
-        private List<RailwaySystem> branches = null;
-        private List<Station> stations = null;
-        private List<Train> trains = null;
-        private List<Route> routes = null;
-        private List<TrainType> trainTypes = null;
+        private List<Object> entities;
         private String[] columnNames;
         private EntityType entityType;
         private List<Boolean> changedRows;
         public EntityEditModel(List<Object> items, EntityType entityType) {
             changedRows = new ArrayList<>();
             this.entityType = entityType;
+            this.entities = items;
+            for (int i=0; i<entities.size();i++) {
+                changedRows.add(false);
+            }
             switch (entityType) {
                 case BRANCHES:
-                    this.branches = new ArrayList<>();
-                    for (int i=0; i<items.size();i++) {
-                        changedRows.add(false);
-                        this.branches.add((RailwaySystem)items.get(i));
-                    }
                     columnNames = new String[] {"#","Исходная станция","Конечная станция","Дистанция"};
                     break;
                 case STATIONS:
-                    this.stations = new ArrayList<>();
-                    for (int i=0; i<items.size();i++) {
-                        changedRows.add(false);
-                        this.stations.add((Station)items.get(i));
-                    }
                     columnNames = new String[] {"#","Cтанция"};
                     break;
                 case TRAINS:
-                    this.trains = new ArrayList<>();
-                    for (int i=0; i<items.size();i++) {
-                        changedRows.add(false);
-                        this.trains.add((Train)items.get(i));
-                    }
                     columnNames = new String[] {"#","Тип","Вместимость"};
                     break;
-                case ROUTES:
-                    this.routes = new ArrayList<>();
-                    for (int i=0; i<items.size();i++) {
-                        changedRows.add(false);
-                        this.routes.add((Route)items.get(i));
-                    }
-                    columnNames = new String[] {"#","Поезд"};
+                case SCHEDULES:
+                    columnNames = new String[] {"#","Задержка", "Время отправления","Цена одного километра","Маршрут","Поезд"};
                     break;
                 case TRAINTYPES:
-                    this.trainTypes = new ArrayList<>();
-                    for (int i=0; i<items.size();i++) {
-                        changedRows.add(false);
-                        this.trainTypes.add((TrainType)items.get(i));
-                    }
                     columnNames = new String[] {"#","Тип поезда","Модификатор цены"};
+                    break;
+                case TRAINCREWS:
+                    columnNames = new String[] {"#","Сотрудник","Поезд"};
                     break;
             }
         }
@@ -101,70 +199,100 @@ public class EntityEditModel extends AbstractTableModel  {
                     return getStationValueAt(rowIndex,columnIndex);
                 case TRAINS:
                     return getTrainValueAt(rowIndex,columnIndex);
-                case ROUTES:
-                    return getRouteValueAt(rowIndex,columnIndex);
+                case SCHEDULES:
+                    return getScheduleValueAt(rowIndex,columnIndex);
                 case TRAINTYPES:
                     return getTrainTypeValueAt(rowIndex,columnIndex);
+                case TRAINCREWS:
+                    return getTrainCrewValueAt(rowIndex,columnIndex);
                 default:
                     return "dicks";
             }
         }
         private Object getBranchValueAt(int rowIndex, int columnIndex) {
+            RailwaySystem branch = (RailwaySystem)entities.get(rowIndex);
             switch (columnIndex) {
                 case 0:
-                    return branches.get(rowIndex).getId();
+                    return branch.getId();
                 case 1:
-                    return branches.get(rowIndex).getInStation();
+                    return branch.getInStation();
                 case 2:
-                    return branches.get(rowIndex).getOutStation();
+                    return branch.getOutStation();
                 case 3:
-                    return branches.get(rowIndex).getDistance();
+                    return branch.getDistance();
                 default:
-                    return "dicks";
+                    return "th";
             }
         }
         private Object getStationValueAt(int rowIndex, int columnIndex) {
+            Station station = (Station)entities.get(rowIndex);
             switch (columnIndex) {
                 case 0:
-                    return stations.get(rowIndex).getId();
+                    return station.getId();
                 case 1:
-                    return stations.get(rowIndex).getName();
+                    return station.getName();
                 default:
-                    return "dicks";
+                    return "th";
             }
         }
         private Object getTrainValueAt(int rowIndex, int columnIndex) {
+            Train train = (Train)entities.get(rowIndex);
             switch (columnIndex) {
                 case 0:
-                    return trains.get(rowIndex).getId();
+                    return train.getId();
                 case 1:
-                    return trains.get(rowIndex).getType();
+                    return train.getType();
                 case 2:
-                    return trains.get(rowIndex).getCapacity();
+                    return train.getCapacity();
                 default:
-                    return "dicks";
+                    return "th";
             }
         }
-        private Object getRouteValueAt(int rowIndex, int columnIndex) {
+        private Object getScheduleValueAt(int rowIndex, int columnIndex) {
+            Schedule sh = (Schedule)entities.get(rowIndex);
+            // {"#","Задержка", "Время отправления","Цена одного километра","Маршрут","Поезд"}
             switch (columnIndex) {
                 case 0:
-                    return routes.get(rowIndex).getId();
+                    return sh.getId();
                 case 1:
-                    return routes.get(rowIndex).getTrain();
+                    return sh.getDelay().toMinutes();
+                case 2:
+                    return sh.getDepartureTime();
+                case 3:
+                    return sh.getPricePerKm();
+                case 4:
+                    return sh.getRoute();
+                case 5:
+                    return sh.getTrain();
                 default:
-                    return "dicks";
+                    return "th";
             }
         }
         private Object getTrainTypeValueAt(int rowIndex, int columnIndex) {
+            TrainType tt = (TrainType)entities.get(rowIndex);
             switch (columnIndex) {
                 case 0:
-                    return trainTypes.get(rowIndex).getId();
+                    return tt.getId();
                 case 1:
-                    return trainTypes.get(rowIndex).getName();
+                    return tt.getName();
                 case 2:
-                    return trainTypes.get(rowIndex).getPriceCoeff();
+                    return tt.getPriceCoeff();
                 default:
-                    return "dicks";
+                    return "th";
+            }
+        }
+        private Object getTrainCrewValueAt(int rowIndex, int columnIndex) {
+            TrainCrew tc = (TrainCrew)entities.get(rowIndex);
+            // {"#","Сотрудник","Поезд"}
+            switch (columnIndex) {
+                case 0:
+                    return tc.getId();
+                case 1:
+                    return tc.getConsumer();
+                case 2:
+                    return tc.getTrain();
+                default:
+                    return "th";
             }
         }
         
@@ -177,130 +305,81 @@ public class EntityEditModel extends AbstractTableModel  {
                     setStationValueAt(value, rowIndex,columnIndex); break;
                 case TRAINS:
                     setTrainValueAt(value, rowIndex,columnIndex); break;
-                case ROUTES:
-                    setRouteValueAt(value, rowIndex,columnIndex); break;
+                case SCHEDULES:
+                    setScheduleValueAt(value, rowIndex,columnIndex); break;
                 case TRAINTYPES:
                     setTrainTypeValueAt(value, rowIndex,columnIndex); break;
+                case TRAINCREWS:
+                    setTrainCrewValueAt(value, rowIndex,columnIndex); break;
             }
+            changedRows.set(rowIndex, true);
         }
         private void setBranchValueAt(Object value, int rowIndex, int columnIndex) {
+            RailwaySystem rs = (RailwaySystem)entities.get(rowIndex);
             switch (columnIndex) {
                 case 1:
-                    branches.get(rowIndex).setInStation((Station)value); break;
+                    rs.setInStation((Station)value); break;
                 case 2:
-                    branches.get(rowIndex).setOutStation((Station)value); break;
+                    rs.setOutStation((Station)value); break;
                 case 3:
-                    branches.get(rowIndex).setDistance(Float.parseFloat((String)value)); break;
+                    rs.setDistance(Float.parseFloat((String)value)); break;
             }
-            changedRows.set(rowIndex, true);
         }
         private void setStationValueAt(Object value, int rowIndex, int columnIndex) {
-            stations.get(rowIndex).setName((String)value);
-            changedRows.set(rowIndex, true);
+            Station st = (Station)entities.get(rowIndex);
+            st.setName((String)value);
         }
         private void setTrainValueAt(Object value, int rowIndex, int columnIndex) {
+            Train t = (Train)entities.get(rowIndex);
             switch (columnIndex) {
                 case 1:
-                    trains.get(rowIndex).setType((TrainType)value); break;
+                    t.setType((TrainType)value); break;
                 case 2:
-                    trains.get(rowIndex).setCapacity(Integer.parseInt((String)value)); break;
+                    t.setCapacity(Integer.parseInt((String)value)); break;
             }
-            changedRows.set(rowIndex, true);
         }
-        private void setRouteValueAt(Object value, int rowIndex, int columnIndex) {
-            routes.get(rowIndex).setTrain((Train)value);
-            changedRows.set(rowIndex, true);
+        private void setScheduleValueAt(Object value, int rowIndex, int columnIndex) {
+            Schedule sh = (Schedule)entities.get(rowIndex);
+            // {"#","Задержка", "Время отправления","Цена одного километра","Маршрут","Поезд"}
+            switch (columnIndex) {
+                case 1:
+                    sh.setDelay(Duration.ofMinutes((Long)value)); break;
+                case 2:
+                    sh.setDepartureTime(LocalDateTime.parse((String)value)); break;
+                case 3:
+                    sh.setPricePerKm(Float.parseFloat((String)value)); break;
+                case 4:
+                    sh.setRoute((Route)value); break;
+                case 5:
+                    sh.setTrain((Train)value); break;
+            }
         }
         private void setTrainTypeValueAt(Object value, int rowIndex, int columnIndex) {
+            TrainType tt = (TrainType)entities.get(rowIndex);
              switch (columnIndex) {
                 case 1:
-                    trainTypes.get(rowIndex).setName((String)value); break;
+                    tt.setName((String)value); break;
                 case 2:
-                    trainTypes.get(rowIndex).setPriceCoeff(Float.parseFloat((String)value)); break;
+                    tt.setPriceCoeff(Float.parseFloat((String)value)); break;
             }
-            changedRows.set(rowIndex, true);
         }
-        
-        public Iterable<Object> getValuesToUpdate() {
-            List<Object> result = new ArrayList<>();
-            switch (entityType) {
-                case BRANCHES:
-                    for (int i=0; i<this.branches.size(); i++)
-                        if (branches.get(i).getId()!=-1 && changedRows.get(i)) {
-                            result.add(branches.get(i));
-                            changedRows.set(i, false);
-                        }
-                    break;
-                case STATIONS:
-                    for (int i=0; i<this.stations.size(); i++)
-                        if (stations.get(i).getId()!=-1 && changedRows.get(i)) {
-                            result.add(stations.get(i));
-                            changedRows.set(i, false);
-                        }
-                    break;
-                case TRAINS:
-                    for (int i=0; i<this.trains.size(); i++)
-                        if (trains.get(i).getId()!=-1 && changedRows.get(i)) {
-                            result.add(trains.get(i));
-                            changedRows.set(i, false);
-                        }
-                    break;
-                case ROUTES:
-                    for (int i=0; i<this.routes.size(); i++)
-                        if (routes.get(i).getId()!=-1 && changedRows.get(i)) {
-                            result.add(routes.get(i));
-                            changedRows.set(i, false);
-                        }
-                    break;
-                case TRAINTYPES:
-                    for (int i=0; i<this.trainTypes.size(); i++)
-                        if (trainTypes.get(i).getId()!=-1 && changedRows.get(i)) {
-                            result.add(routes.get(i));
-                            changedRows.set(i, false);
-                        }
-                    break;
+        private void setTrainCrewValueAt(Object value, int rowIndex, int columnIndex) {
+            TrainCrew tc = (TrainCrew)entities.get(rowIndex);
+            // {"#","Сотрудник","Поезд"}
+             switch (columnIndex) {
+                case 1:
+                    tc.setConsumer((User)value); break;
+                case 2:
+                    tc.setTrain((Train)value); break;
             }
-            return result;
         }
-        public Iterable<Object> getValuesToInsert() {
+        public Iterable<Object> getChangedValues() {
             List<Object> result = new ArrayList<>();
-            switch (entityType) {
-                case BRANCHES:
-                    for (int i=0; i<this.branches.size(); i++)
-                        if (branches.get(i).getId()==-1 && changedRows.get(i)) {
-                            result.add(branches.get(i));
-                            changedRows.set(i, false);
-                        }
-                    break;
-                case STATIONS:
-                    for (int i=0; i<this.stations.size(); i++)
-                        if (stations.get(i).getId()==-1 && changedRows.get(i)) {
-                            result.add(stations.get(i));
-                            changedRows.set(i, false);
-                        }
-                    break;
-                case TRAINS:
-                    for (int i=0; i<this.trains.size(); i++)
-                        if (trains.get(i).getId()==-1 && changedRows.get(i)) {
-                            result.add(trains.get(i));
-                            changedRows.set(i, false);
-                        }
-                    break;
-                case ROUTES:
-                    for (int i=0; i<this.routes.size(); i++)
-                        if (routes.get(i).getId()==-1 && changedRows.get(i)) {
-                            result.add(routes.get(i));
-                            changedRows.set(i, false);
-                        }
-                    break;
-                case TRAINTYPES:
-                    for (int i=0; i<this.trainTypes.size(); i++)
-                        if (trainTypes.get(i).getId()==-1 && changedRows.get(i)) {
-                            result.add(trainTypes.get(i));
-                            changedRows.set(i, false);
-                        }
-                    break;
-            }
+            for (int i=0; i<this.entities.size(); i++)
+                if (changedRows.get(i)) {
+                    result.add(entities.get(i));
+                    changedRows.set(i, false);
+                }
             return result;
         }
         
@@ -309,29 +388,32 @@ public class EntityEditModel extends AbstractTableModel  {
                 case BRANCHES:
                     RailwaySystem rs = (RailwaySystem)value;
                     rs.setId(-1);
-                    this.branches.add(rs);
+                    this.entities.add(rs);
                     break;
                 case STATIONS:
                     Station st = (Station)value;
                     st.setId(-1);
-                    this.stations.add(st);
+                    this.entities.add(st);
                     break;
                 case TRAINS:
                     Train t = (Train)value;
                     t.setId(-1);
-                    this.trains.add(t);
+                    this.entities.add(t);
                     break;
-                case ROUTES:
-                    Route r = (Route)value;
-                    r.setId(-1);
-                    this.routes.add(r);
+                case SCHEDULES:
+                    Schedule sh = (Schedule)value;
+                    sh.setId(-1);
+                    this.entities.add(sh);
                     break;
                 case TRAINTYPES:
                     TrainType tt = (TrainType)value;
                     tt.setId(-1);
-                    tt.setName("Тип поезда");
-                    tt.setPriceCoeff(1);
-                    this.trainTypes.add(tt);
+                    this.entities.add(tt);
+                    break;
+                case TRAINCREWS:
+                    TrainCrew tc = (TrainCrew)value;
+                    tc.setId(-1);
+                    this.entities.add(tc);
                     break;
             }
             this.changedRows.add(false);
@@ -339,65 +421,17 @@ public class EntityEditModel extends AbstractTableModel  {
             
         }
         public void removeRows(int[] rows) {
-            switch (this.entityType) {
-                case BRANCHES:
-                    for (int row: rows)
-                        this.branches.remove(row);
-                    break;
-                case STATIONS:
-                    for (int row: rows)
-                        this.stations.remove(row);
-                    break;
-                case TRAINS:
-                    for (int row: rows)
-                        this.trains.remove(row);
-                    break;
-                case ROUTES:
-                    for (int row: rows)
-                        this.routes.remove(row);
-                    break;
-                case TRAINTYPES:
-                    for (int row: rows)
-                        this.trainTypes.remove(row);
-                    break;
-            }
-            for (int row: rows) 
+            for (int row: rows) {
                 this.changedRows.remove(row);
+                this.entities.remove(row);
+            }
             this.fireTableRowsDeleted(rows[0], rows[rows.length-1]);
         }
+        
         public List<Object> getRows(int[] rows) {
             List<Object> result = new ArrayList<>();
-            switch (this.entityType) {
-                case BRANCHES:
-                    for (int row: rows) {
-                        if (branches.get(row).getId()!=-1)
-                            result.add(branches.get(row));
-                    }
-                    break;
-                case STATIONS:
-                    for (int row: rows) {
-                        if (stations.get(row).getId()!=-1)
-                            result.add(stations.get(row));
-                    }
-                    break;
-                case TRAINS:
-                    for (int row: rows) {
-                        if (trains.get(row).getId()!=-1)
-                            result.add(trains.get(row));
-                    }
-                    break;
-                case ROUTES:
-                    for (int row: rows) {
-                        if (routes.get(row).getId()!=-1)
-                            result.add(routes.get(row));
-                    }
-                    break;
-                case TRAINTYPES:
-                    for (int row: rows) {
-                        if (trainTypes.get(row).getId()!=-1)
-                            result.add(trainTypes.get(row));
-                    }
-                    break;
+            for (int row: rows) {
+                    result.add(entities.get(row));
             }
             return result;
         }

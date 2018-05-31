@@ -6,6 +6,8 @@
 package kiri.mavenproject1;
 
 import java.awt.Component;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
@@ -27,75 +29,6 @@ import kiri.mavenproject1.entities.*;
 public class BranchEditPage extends JDialog {
     DBHandle handle;
     EntityEditModel editModel;
-    class StationRenderer extends JComboBox implements TableCellRenderer {
-        public StationRenderer(Station[] items) {
-          super(items);
-        }
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-            boolean hasFocus, int row, int column) {
-            if (isSelected) {
-              setForeground(table.getSelectionForeground());
-              super.setBackground(table.getSelectionBackground());
-            } else {
-              setForeground(table.getForeground());
-              setBackground(table.getBackground());
-            }
-            setSelectedItem(value);
-            return this;
-          }
-    }
-    class TrainTypeRenderer extends JComboBox implements TableCellRenderer {
-        public TrainTypeRenderer(TrainType[] items) {
-          super(items);
-        }
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-            boolean hasFocus, int row, int column) {
-            if (isSelected) {
-              setForeground(table.getSelectionForeground());
-              super.setBackground(table.getSelectionBackground());
-            } else {
-              setForeground(table.getForeground());
-              setBackground(table.getBackground());
-            }
-            setSelectedItem(value);
-            return this;
-          }
-    }
-    class TrainRenderer extends JComboBox implements TableCellRenderer {
-        public TrainRenderer(Train[] items) {
-          super(items);
-        }
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-            boolean hasFocus, int row, int column) {
-            if (isSelected) {
-              setForeground(table.getSelectionForeground());
-              super.setBackground(table.getSelectionBackground());
-            } else {
-              setForeground(table.getForeground());
-              setBackground(table.getBackground());
-            }
-            setSelectedItem(value);
-            return this;
-          }
-    }
-
-    class StationEditor extends DefaultCellEditor {
-        public StationEditor(Station[] items) {
-            super(new JComboBox(items));
-        }
-    }
-    class TrainTypeEditor extends DefaultCellEditor {
-        public TrainTypeEditor(TrainType[] items) {
-            super(new JComboBox(items));
-        }
-    }
-    class TrainEditor extends DefaultCellEditor {
-        public TrainEditor(Train[] items) {
-            super(new JComboBox(items));
-        }
-    }
-    
-        
     /**
      * Creates new form BranchEditPage
      * @param handle
@@ -133,6 +66,12 @@ public class BranchEditPage extends JDialog {
     }
     private Route[] toRouteArray(List<Route> list) {
         Route[] res = new Route[list.size()];
+        for (int i=0; i<list.size(); i++)
+            res[i]=list.get(i);
+        return res;
+    }
+    private User[] toUserArray(List<User> list) {
+        User[] res = new User[list.size()];
         for (int i=0; i<list.size(); i++)
             res[i]=list.get(i);
         return res;
@@ -175,17 +114,21 @@ public class BranchEditPage extends JDialog {
         col.setCellRenderer(new TrainTypeRenderer(ttypes));
         resultTbl.setRowHeight(25);
     }
-    private void loadRouteModel() {
-        List<Route> routes = handle.getRoutes();
+    private void loadScheduleModel() {
+        List<Schedule> schedules = handle.getSchedules();
         List<Object> items = new ArrayList<>();
-        for (int i=routes.size()-1; i>=0; i--)
-            items.add((Object)routes.get(i));
-        editModel = new EntityEditModel(items, EntityType.ROUTES);
+        for (int i=schedules.size()-1; i>=0; i--)
+            items.add((Object)schedules.get(i));
+        editModel = new EntityEditModel(items, EntityType.SCHEDULES);
         this.resultTbl.setModel(editModel);
         Train[] trains = toTrainArray(handle.getTrains());
-        TableColumn col = this.resultTbl.getColumnModel().getColumn(1);
+        TableColumn col = this.resultTbl.getColumnModel().getColumn(5);
         col.setCellEditor(new TrainEditor(trains));
         col.setCellRenderer(new TrainRenderer(trains));
+        Route[] routes = toRouteArray(handle.getRoutes());
+        TableColumn col1 = this.resultTbl.getColumnModel().getColumn(4);
+        col1.setCellEditor(new RouteEditor(routes));
+        col1.setCellRenderer(new RouteRenderer(routes));
         resultTbl.setRowHeight(25);
     }
     private void loadTrainTypesModel() {
@@ -195,6 +138,24 @@ public class BranchEditPage extends JDialog {
             items.add((Object)trainTypes.get(i));
         editModel = new EntityEditModel(items,EntityType.TRAINTYPES);
         this.resultTbl.setModel(editModel);
+        resultTbl.setRowHeight(25);
+    }
+    private void loadTrainCrewModel() {
+        List<TrainCrew> trainCrews = handle.getTrainCrews();
+        List<Object> items = new ArrayList<>();
+        for (int i=trainCrews.size()-1; i>=0; i--)
+            items.add((Object)trainCrews.get(i));
+        editModel = new EntityEditModel(items,EntityType.TRAINCREWS);
+        this.resultTbl.setModel(editModel);
+        Train[] trains = toTrainArray(handle.getTrains());
+        TableColumn col = this.resultTbl.getColumnModel().getColumn(2);
+        col.setCellEditor(new TrainEditor(trains));
+        col.setCellRenderer(new TrainRenderer(trains));
+        resultTbl.setRowHeight(25);
+        User[] employees = toUserArray(handle.getEmployees());
+        TableColumn col1 = this.resultTbl.getColumnModel().getColumn(1);
+        col1.setCellEditor(new UserEditor(employees));
+        col1.setCellRenderer(new UserRenderer(employees));
         resultTbl.setRowHeight(25);
     }
     /**
@@ -211,7 +172,7 @@ public class BranchEditPage extends JDialog {
         entitySelectCombo = new javax.swing.JComboBox<>();
         jLabel1 = new javax.swing.JLabel();
         AddBtn = new javax.swing.JButton();
-        AddBtn1 = new javax.swing.JButton();
+        deleteBtn = new javax.swing.JButton();
         saveBtn = new javax.swing.JButton();
 
         resultTbl.setModel(new javax.swing.table.DefaultTableModel(
@@ -228,7 +189,7 @@ public class BranchEditPage extends JDialog {
         resultTbl.setRowHeight(22);
         jScrollPane1.setViewportView(resultTbl);
 
-        entitySelectCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Ветки", "Станции", "Поезда", "Маршруты", "Типы поездов" }));
+        entitySelectCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Ветки", "Станции", "Поезда", "Отправления", "Типы поездов", "Экипажи поездов" }));
         entitySelectCombo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 entitySelectComboActionPerformed(evt);
@@ -244,10 +205,10 @@ public class BranchEditPage extends JDialog {
             }
         });
 
-        AddBtn1.setText("<html>Удалить<br>выделенное</htm>");
-        AddBtn1.addActionListener(new java.awt.event.ActionListener() {
+        deleteBtn.setText("<html>Удалить<br>выделенное</htm>");
+        deleteBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                AddBtn1ActionPerformed(evt);
+                deleteBtnActionPerformed(evt);
             }
         });
 
@@ -275,7 +236,7 @@ public class BranchEditPage extends JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(AddBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(AddBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(deleteBtn, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -292,7 +253,7 @@ public class BranchEditPage extends JDialog {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(saveBtn)
                             .addComponent(AddBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(AddBtn1))))
+                            .addComponent(deleteBtn))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 477, Short.MAX_VALUE)
                 .addContainerGap())
@@ -310,18 +271,27 @@ public class BranchEditPage extends JDialog {
             case 2:
                 loadTrainModel(); break;
             case 3:
-                loadRouteModel(); break;
+                loadScheduleModel(); break;
             case 4:
                 loadTrainTypesModel(); break;
+            case 5:
+                loadTrainCrewModel(); break;
         }
     }//GEN-LAST:event_entitySelectComboActionPerformed
 
     private void saveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveBtnActionPerformed
         try {
-            Iterable<Object> toUpdate = editModel.getValuesToUpdate();
-            handle.updateEntities(toUpdate);
-            Iterable<Object> toInsert = editModel.getValuesToInsert();
-            handle.InsertBatchEntities(toInsert);
+            Iterable<Object> toUpdate = editModel.getChangedValues();
+            switch (editModel.getEntityType()) {
+                case BRANCHES: handle.addRailwaySystem(toUpdate); break;
+                case STATIONS: handle.addStation(toUpdate); break;
+                case SCHEDULES: handle.addSchedules(toUpdate); break;
+                case TRAINTYPES: handle.updateEntities(toUpdate); break;
+                case TRAINS: handle.updateEntities(toUpdate); break;
+                case TRAINCREWS: handle.updateEntities(toUpdate); break;
+            }
+            //Iterable<Object> toInsert = editModel.getValuesToInsert();
+            //handle.InsertBatchEntities(toInsert);
             Utils.showMessage(this, "Изменения успешно сохранены", "", false);
         } catch (Throwable exc) {
             Utils.showMessage(this, exc.getMessage(), "Ошибка", true);
@@ -329,7 +299,7 @@ public class BranchEditPage extends JDialog {
         }
     }//GEN-LAST:event_saveBtnActionPerformed
 
-    private void AddBtn1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddBtn1ActionPerformed
+    private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
         int[] rows = resultTbl.getSelectedRows();
         if (rows.length==0)
             return;
@@ -345,54 +315,85 @@ public class BranchEditPage extends JDialog {
                 Utils.traceAllErrors(exc);
             }
         }            
-    }//GEN-LAST:event_AddBtn1ActionPerformed
+    }//GEN-LAST:event_deleteBtnActionPerformed
 
     private void AddBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddBtnActionPerformed
-        switch (editModel.getEntityType()) {
-            case BRANCHES:
-                RailwaySystem rs = new RailwaySystem();
-                List<Station> stations = handle.getStations();
-                rs.setDistance(100);
-                rs.setInStation(stations.get(0));
-                rs.setOutStation(stations.get(1));
-                rs.setId(-1);
-                editModel.addRow(rs);
-                break;
-            case STATIONS:
-                Station st = new Station();
-                st.setName("Имя станции");
-                st.setId(-1);
-                editModel.addRow(st);
-                break;
-            case ROUTES:
-                Route r = new Route();
-                List<Train> trains = handle.getTrains();
-                r.setTrain(trains.get(0));
-                r.setId(-1);
-                editModel.addRow(r);
-                break;
-            case TRAINS:
-                Train t = new Train();
-                List<TrainType> types = handle.getTrainTypes();
-                t.setType(types.get(0));
-                t.setCapacity(100);
-                t.setId(-1);
-                editModel.addRow(t);
-                break;
-            case TRAINTYPES:
-                TrainType tt = new TrainType();
-                tt.setName("Тип поезда");
-                tt.setPriceCoeff(1);
-                tt.setId(-1);
-                editModel.addRow(tt);
-                break;
+        try {
+            switch (editModel.getEntityType()) {
+                case BRANCHES:
+                    RailwaySystem rs = new RailwaySystem();
+                    List<Station> stations = handle.getStations();
+                    if (stations.isEmpty())
+                        throw new IllegalArgumentException("Нет станций");
+                    rs.setDistance(100);
+                    rs.setInStation(stations.get(0));
+                    rs.setOutStation(stations.get(1));
+                    rs.setId(-1);
+                    editModel.addRow(rs);
+                    break;
+                case STATIONS:
+                    Station st = new Station();
+                    st.setName("Имя станции");
+                    st.setId(-1);
+                    editModel.addRow(st);
+                    break;
+                case SCHEDULES:
+                    Schedule sh = new Schedule();
+                    List<Train> trains = handle.getTrains();
+                    if (trains.isEmpty())
+                        throw new IllegalArgumentException("Нет поездов");
+                    sh.setTrain(trains.get(0));
+                    sh.setDelay(Duration.ZERO);
+                    sh.setPricePerKm(5);
+                    sh.setDepartureTime(LocalDateTime.now());
+                    List<Route> routes = handle.getRoutes();
+                    if (routes.isEmpty())
+                        throw new IllegalArgumentException("Нет маршрутов");
+                    sh.setRoute(routes.get(0));
+                    sh.setId(-1);
+                    editModel.addRow(sh);
+                    break;
+                case TRAINS:
+                    Train t = new Train();
+                    List<TrainType> types = handle.getTrainTypes();
+                    if (types.isEmpty())
+                        throw new IllegalArgumentException("Нет типов поездов");
+                    t.setType(types.get(0));
+                    t.setCapacity(100);
+                    t.setId(-1);
+                    editModel.addRow(t);
+                    break;
+                case TRAINTYPES:
+                    TrainType tt = new TrainType();
+                    tt.setName("Тип поезда");
+                    tt.setPriceCoeff(1);
+                    tt.setId(-1);
+                    editModel.addRow(tt);
+                    break;
+                case TRAINCREWS:
+                    TrainCrew tc = new TrainCrew();
+                    List<User> employees = handle.getEmployees();
+                    if (employees.isEmpty())
+                        throw new IllegalArgumentException("Нет сотрудников");
+                    tc.setConsumer(employees.get(0));
+                    List<Train> trains1 = handle.getTrains();
+                    if (trains1.isEmpty())
+                        throw new IllegalArgumentException("Нет поездов");
+                    tc.setTrain(trains1.get(0));
+                    tc.setId(-1);
+                    editModel.addRow(tc);
+                    break;
+            }
+        }
+        catch (Throwable exc) {
+            Utils.showMessage(this, exc.getMessage(), "", true);
         }
     }//GEN-LAST:event_AddBtnActionPerformed
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton AddBtn;
-    private javax.swing.JButton AddBtn1;
+    private javax.swing.JButton deleteBtn;
     private javax.swing.JComboBox<String> entitySelectCombo;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;

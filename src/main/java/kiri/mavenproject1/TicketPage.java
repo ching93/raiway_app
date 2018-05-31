@@ -8,6 +8,7 @@ package kiri.mavenproject1;
 import java.text.ParseException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,6 +26,7 @@ import kiri.mavenproject1.entities.*;
  */
 public class TicketPage extends JFrame {
     private DBHandle handle;
+    List<Station> stations;
     DateTimeBox leftBorderBox;
     DateTimeBox rightBorderBox;
     ResultTableModel resultModel;
@@ -117,16 +119,24 @@ public class TicketPage extends JFrame {
         rightBorderBox.setDateTime(LocalDateTime.now().plus(Duration.ofDays(5)));
         this.rightBorderPnl.add(rightBorderBox);
         this.rightBorderPnl.validate();
-        
+        stations = new ArrayList<>();
         logIn();
     }
     private void showStations() {
-        List<Station> stations = handle.getStations();
-        depStationCombo.removeAllItems();
-        arrStationCombo.removeAllItems();
-        for (Station station: stations) {
-            depStationCombo.addItem(station);
-            arrStationCombo.addItem(station);
+        List<Station> news = handle.getStations();
+        for (Station st: stations) {
+            if (news.indexOf(st)==-1) {
+                stations.remove(st);
+                depStationCombo.removeItem(st);
+                arrStationCombo.removeItem(st);
+            }
+        }
+        for (Station ns: news) {
+            if (stations.indexOf(ns)==-1) {
+                stations.add(ns);
+                depStationCombo.addItem(ns);
+                arrStationCombo.addItem(ns);
+            }
         }
     }
     /**
@@ -140,8 +150,6 @@ public class TicketPage extends JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        depStationCombo = new javax.swing.JComboBox<>();
-        arrStationCombo = new javax.swing.JComboBox<>();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
@@ -149,6 +157,8 @@ public class TicketPage extends JFrame {
         rightBorderPnl = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
         applyBtn = new javax.swing.JButton();
+        depStationCombo = new javax.swing.JComboBox<>();
+        arrStationCombo = new javax.swing.JComboBox<>();
         buyBtn1 = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -165,18 +175,6 @@ public class TicketPage extends JFrame {
         jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
         jLabel1.setText("Исходная станция");
-
-        depStationCombo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                depStationComboActionPerformed(evt);
-            }
-        });
-
-        arrStationCombo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                arrStationComboActionPerformed(evt);
-            }
-        });
 
         jLabel2.setText("Конечная станция");
 
@@ -224,31 +222,33 @@ public class TicketPage extends JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                        .addGap(21, 21, 21)
-                        .addComponent(jLabel1))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(depStationCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 163, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(arrStationCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 163, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGap(21, 21, 21)
+                        .addComponent(jLabel1)
+                        .addGap(59, 59, 59))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(depStationCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(arrStationCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(16, 16, 16)
                         .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(leftBorderPnl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(rightBorderPnl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(rightBorderPnl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(21, 21, 21)
                         .addComponent(jLabel2)
-                        .addGap(179, 179, 179)
-                        .addComponent(jLabel3)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 288, Short.MAX_VALUE)
+                        .addComponent(jLabel3)
+                        .addGap(205, 205, 205)))
                 .addComponent(applyBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 87, Short.MAX_VALUE)
                 .addContainerGap())
         );
@@ -257,7 +257,9 @@ public class TicketPage extends JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(applyBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(applyBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel1)
@@ -265,20 +267,20 @@ public class TicketPage extends JFrame {
                                 .addComponent(jLabel2)
                                 .addComponent(jLabel3)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(depStationCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(arrStationCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                    .addComponent(jLabel4)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 11, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                        .addComponent(rightBorderPnl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(leftBorderPnl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addComponent(jLabel5))))
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(rightBorderPnl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(leftBorderPnl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(jLabel5))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(arrStationCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(depStationCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(jLabel4))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 11, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 9, Short.MAX_VALUE))))
         );
 
         buyBtn1.setText("Купить");
@@ -377,7 +379,7 @@ public class TicketPage extends JFrame {
                         .addComponent(userDataLbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)))
+                        .addGap(9, 9, 9)))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(adminPageBtn, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -405,7 +407,7 @@ public class TicketPage extends JFrame {
         LocalDateTime rightBorder = this.rightBorderBox.getDateTime();
         try {
             List<PrepareTicketResult> result = handle.prepareBuyTicket(depStation, arrStation, leftBorder, rightBorder);
-            if (result == null || result.size()==0)
+            if (result == null || result.isEmpty())
                 Utils.showMessage(this,"Не найдено отправлений с заданными параметрами","",true);
             else {
                 ResultTableModel model = new ResultTableModel(result);
@@ -468,20 +470,12 @@ public class TicketPage extends JFrame {
         authPage.dispose(); 
         this.logIn();
     }//GEN-LAST:event_logInBtnActionPerformed
-
-    private void depStationComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_depStationComboActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_depStationComboActionPerformed
-
-    private void arrStationComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrStationComboActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_arrStationComboActionPerformed
     
     private void logIn() {
         try {
             if (handle.isLogged()) {
                 this.userDataLbl.setText("Текущий пользователь "+handle.getCurrentUser().getLogin());
-                //this.showStations();
+                this.showStations();
                 this.logOutBtn.setEnabled(true);
                 this.buyBtn1.setEnabled(true);
                 if (handle.getUserRole().getId()<=2)

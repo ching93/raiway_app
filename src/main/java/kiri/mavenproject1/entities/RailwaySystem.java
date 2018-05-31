@@ -52,16 +52,12 @@ public class RailwaySystem {
         return this.distance;
     }
     public void setOutStation(Station out) {
-        if (in_station!=null && out==in_station)
-            throw new IllegalArgumentException("In station can't be equal out station");
         this.out_station = out;
     }
     public Station getOutStation() {
         return this.out_station;
     }
     public void setInStation(Station in) {
-        if (out_station!=null && in==out_station)
-            throw new IllegalArgumentException("In station can't be equal out station");
         this.in_station = in;
     }
     public Station getInStation() {
