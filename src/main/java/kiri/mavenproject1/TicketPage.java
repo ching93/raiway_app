@@ -31,7 +31,7 @@ public class TicketPage extends JFrame {
     
     class ResultTableModel extends AbstractTableModel {
         private List<PrepareTicketResult> results;
-        private String[] columnNames = new String[] {"X","Маршрут","Время отправления","Время прибытия","Время в пути","Цена"};
+        private String[] columnNames = new String[] {"X","Маршрут","Время отправления","Время прибытия","Время в пути","Цена","Осталось мест"};
         private int selectedRow;
         public ResultTableModel(List<PrepareTicketResult> results) {
             this.results = results;
@@ -50,9 +50,14 @@ public class TicketPage extends JFrame {
                     return Boolean.class;
                 case 5:
                     return Float.class;
+                case 6:
+                    return Integer.class;
                 default:
                     return String.class;
             }
+        }
+        public void removeAllRows() {
+            this.results.removeAll(results);
         }
         @Override
         public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -96,6 +101,8 @@ public class TicketPage extends JFrame {
                     return hours+"часов "+minutes+"минут";
                 case 5:
                     return current.price;
+                case 6:
+                    return current.placesLeft;
                 
             }
             return "nothing";
@@ -152,6 +159,8 @@ public class TicketPage extends JFrame {
         applyBtn = new javax.swing.JButton();
         depStationPnl = new javax.swing.JPanel();
         arrStationPnl = new javax.swing.JPanel();
+        priceSortBox = new javax.swing.JCheckBox();
+        dateSortBox = new javax.swing.JCheckBox();
         buyBtn1 = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -236,6 +245,10 @@ public class TicketPage extends JFrame {
             .addGap(0, 27, Short.MAX_VALUE)
         );
 
+        priceSortBox.setText("Сортировка по цене");
+
+        dateSortBox.setText("Сортировка по дате");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -266,6 +279,12 @@ public class TicketPage extends JFrame {
                         .addGap(35, 35, 35)))
                 .addComponent(applyBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 87, Short.MAX_VALUE)
                 .addContainerGap())
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(priceSortBox)
+                .addGap(44, 44, 44)
+                .addComponent(dateSortBox)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -294,7 +313,11 @@ public class TicketPage extends JFrame {
                                     .addComponent(leftBorderPnl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(arrStationPnl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(depStationPnl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addContainerGap(14, Short.MAX_VALUE))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(priceSortBox)
+                            .addComponent(dateSortBox))
+                        .addContainerGap(11, Short.MAX_VALUE))))
         );
 
         buyBtn1.setText("Купить");
@@ -364,59 +387,59 @@ public class TicketPage extends JFrame {
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 970, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(userDataLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 600, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(10, 10, 10)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(10, 10, 10)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(logInBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(adminPageBtn)
-                            .addComponent(signInBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(logOutBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(buyBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(16, Short.MAX_VALUE))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(logInBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(adminPageBtn)
+                        .addComponent(signInBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(logOutBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(buyBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(12, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(24, 24, 24)
-                        .addComponent(logInBtn)
-                        .addGap(18, 18, 18)
-                        .addComponent(signInBtn)
-                        .addGap(21, 21, 21)
-                        .addComponent(adminPageBtn, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(26, 26, 26)
-                        .addComponent(logOutBtn)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 485, Short.MAX_VALUE)
-                        .addComponent(buyBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(userDataLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(12, 12, 12)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 508, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap()
+                .addComponent(userDataLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(27, 27, 27)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 475, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(24, 24, 24)
+                .addComponent(logInBtn)
+                .addGap(18, 18, 18)
+                .addComponent(signInBtn)
+                .addGap(21, 21, 21)
+                .addComponent(adminPageBtn, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(26, 26, 26)
+                .addComponent(logOutBtn)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(buyBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(75, 75, 75))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
     
     private void showAvailableRoutes() {
+        if (resultModel!=null)
+            resultModel.removeAllRows();
         Station depStation = (Station)this.depStationCombo.getSelectedItem();                                      
         Station arrStation = (Station)this.arrStationCombo.getSelectedItem();
         LocalDateTime leftBorder = this.leftBorderBox.getDateTime();
         LocalDateTime rightBorder = this.rightBorderBox.getDateTime();
         try {
-            List<PrepareTicketResult> result = handle.prepareBuyTicket(depStation, arrStation, leftBorder, rightBorder);
+            boolean priceSort = this.priceSortBox.isSelected();
+            boolean dateSort = this.dateSortBox.isSelected();
+            List<PrepareTicketResult> result = handle.prepareBuyTicket(depStation, arrStation, leftBorder, rightBorder,priceSort,dateSort);
             if (result == null || result.isEmpty())
                 Utils.showMessage(this,"Не найдено отправлений с заданными параметрами","",true);
             else {
-                ResultTableModel model = new ResultTableModel(result);
-                this.resultTable.setModel(model);
+                resultModel = new ResultTableModel(result);
+                this.resultTable.setModel(resultModel);
                 this.resultTable.validate();
             }
         }
@@ -516,6 +539,7 @@ public class TicketPage extends JFrame {
     private javax.swing.JButton applyBtn;
     private javax.swing.JPanel arrStationPnl;
     private javax.swing.JButton buyBtn1;
+    private javax.swing.JCheckBox dateSortBox;
     private javax.swing.JPanel depStationPnl;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -528,6 +552,7 @@ public class TicketPage extends JFrame {
     private javax.swing.JPanel leftBorderPnl;
     private javax.swing.JButton logInBtn;
     private javax.swing.JButton logOutBtn;
+    private javax.swing.JCheckBox priceSortBox;
     private javax.swing.JTable resultTable;
     private javax.swing.JPanel rightBorderPnl;
     private javax.swing.JButton signInBtn;

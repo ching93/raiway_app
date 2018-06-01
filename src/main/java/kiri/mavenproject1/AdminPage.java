@@ -1,8 +1,6 @@
 package kiri.mavenproject1;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
@@ -21,7 +19,7 @@ public class AdminPage extends JDialog {
     DBHandle handle;
     RouteStationsPanel routeStationsPnl;
     JComboBox<Route> routeCombo;
-    
+    private boolean entitiesChanged = false;
     class RouteNodePanel extends JPanel {
         private JComboBox<Station> stationCombo;
         private final DateTimeBox stayTimeBox;
@@ -260,6 +258,9 @@ public class AdminPage extends JDialog {
         if (handle.getUserRole().getId()!=1)
             this.userEditBtn.setEnabled(false);
         this.validate();
+    }
+    public boolean entitiesChanged() {
+        return entitiesChanged;
     }
 
     /**
@@ -536,6 +537,7 @@ public class AdminPage extends JDialog {
         bep.setVisible(true);
         this.routeStationsPnl.setRailwaySystem(handle.getRailwaySystem());
         this.loadRouteList();
+        this.entitiesChanged = true;
         bep.dispose();
     }//GEN-LAST:event_entityEditBtnActionPerformed
 

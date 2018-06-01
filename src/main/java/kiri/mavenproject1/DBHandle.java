@@ -628,51 +628,82 @@ public class DBHandle {
      * @param rightBorder - правая граница дат
      * @return 
      */
-    public List<PrepareTicketResult> prepareBuyTicket(Station depStation, Station arrStation, LocalDateTime leftBorder, LocalDateTime rightBorder) {
+    public List<PrepareTicketResult> prepareBuyTicket(Station depStation, Station arrStation, LocalDateTime leftBorder, LocalDateTime rightBorder, boolean sortByPrice, boolean sortByDate) {
         if (currentUser==null)
             throw new IllegalArgumentException("Авторизуйтесь для покупки билета");
         Query query;
         // Выбор маршрутов, в которых присутствует начальная станция
-        String arrStationsSql = "SELECT DISTINCT tpb.schedule.id FROM TicketPerBranch tpb WHERE tpb.station.id =:arrStationId";
-        // закомментированы отладочные строки
-        //query = manager.createQuery(arrStationsSql);
-        //query.setParameter("arrStationId", arrStation.getId());
-        //List<Integer> route_ids = query.getResultList();
-        //System.out.println(route_ids.toString());
+        String arrStationsSql = "SELECT DISTINCT tpb.schedule.id FROM TicketPerBranch tpb WHERE tpb.station.id=:arrStationId";
         // и конечная станция,
         String bothStations = "SELECT DISTINCT tpb1.schedule.id FROM TicketPerBranch tpb1 WHERE tpb1.station.id = :depStationId AND tpb1.schedule.id IN ("+arrStationsSql+")";
-        //query = manager.createQuery(bothStations);
-        //query.setParameter("arrStationId", arrStation.getId());
-        //query.setParameter("depStationId", depStation.getId());
-        //route_ids = query.getResultList();
-        //System.out.println(route_ids.toString());
         // которые отправляются с укзанном интервале,   
         String intervaledSql ="SELECT sh.id FROM Schedule sh WHERE sh.departureTime BETWEEN :leftBorder AND :rightBorder";
-        //query = manager.createQuery(intervaledSql);     
-        //query.setParameter("leftBorder", leftBorder);
-        //query.setParameter("rightBorder", rightBorder);
-        //route_ids = query.getResultList();
-        //System.out.println(route_ids.toString());
         // у которых есть свободные места
-        String hasFreeSpaceSql = "SELECT tpb2.schedule.id FROM TicketPerBranch tpb2 GROUP BY tpb2.schedule.id, tpb2.schedule.train.capacity HAVING tpb2.schedule.id IN ("+bothStations+") AND tpb2.schedule.id IN ("+intervaledSql+") "+
-                "AND MAX(tpb2.amount)<tpb2.schedule.train.capacity";
-        //System.out.println(hasFreeSpaceSql);
+        String priceSql;
+        String dateSql;
+        if (sortByPrice)
+            priceSql = ", tpb2.schedule.pricePerKm";
+        else
+            priceSql = "";
+        if (sortByDate)
+            dateSql = ", tpb2.schedule.departureTime";
+        else
+            dateSql="";
+        String hasFreeSpaceSql = "SELECT tpb2 FROM TicketPerBranch tpb2 WHERE tpb2.schedule.id IN ("+bothStations+") AND tpb2.schedule.id IN ("+intervaledSql+") ORDER BY tpb2.schedule.id, tpb2.totalDistance"+priceSql+dateSql; // "+
+                //"AND MAX(tpb2.amount)<tpb2.schedule.train.capacity";
         // объединяем запрос
-        query = manager.createQuery("SELECT sh FROM Schedule sh WHERE sh.id IN ("+hasFreeSpaceSql+")");
+        query = manager.createQuery(hasFreeSpaceSql);//"SELECT sh FROM Schedule sh WHERE sh.id IN ("+hasFreeSpaceSql+")");
         query.setParameter("leftBorder", leftBorder);
         query.setParameter("rightBorder", rightBorder);
         query.setParameter("depStationId", depStation.getId());
         query.setParameter("arrStationId", arrStation.getId());
-        List<Schedule> schedules = query.getResultList();
-        if (schedules.isEmpty())
+        List<TicketPerBranch> tpbs = query.getResultList();
+        if (tpbs.isEmpty())
             return null;
-        StringBuilder ids = new StringBuilder();
+        Schedule currentSchedule = tpbs.get(0).getSchedule();
+        List<PrepareTicketResult> result = new ArrayList<>();
+        int maxFillness = tpbs.get(0).getAmount();
+        int rangeBeginIndex=-1;
+        boolean skip = false;
+        int nextId  = depStation.getId();
+        for (int i=0; i<tpbs.size(); i++) {
+            if (tpbs.get(i).getStation().getId()!=nextId && !skip)
+                continue;
+            else if (tpbs.get(i).getStation().getId()==depStation.getId())
+                rangeBeginIndex=i;
+            skip=true;
+            
+            if (tpbs.get(i).getAmount()>maxFillness) {
+                maxFillness=tpbs.get(i).getAmount();
+            }
+            if (tpbs.get(i).getStation().getId()==arrStation.getId()) {
+                if (maxFillness<=currentSchedule.getTrain().getCapacity()) {
+                    PrepareTicketResult res0 = new PrepareTicketResult();
+                    res0.depStation = tpbs.get(rangeBeginIndex);
+                    res0.arrStation = tpbs.get(i);
+                    res0.placesLeft = currentSchedule.getTrain().getCapacity() - maxFillness;
+                    res0.price = (res0.arrStation.getTotalDistance()-res0.depStation.getTotalDistance())*currentSchedule.getPricePerKm()
+                            *currentSchedule.getTrain().getType().getPriceCoeff();
+                    result.add(res0);
+                    rangeBeginIndex=-1;
+                    maxFillness = tpbs.get(i).getAmount();
+                    if (tpbs.size()!=i+1)
+                        currentSchedule = tpbs.get(i+1).getSchedule();
+                    nextId=depStation.getId();
+                    skip = false;
+                }
+            }
+        }
+        return result;
+        /*StringBuilder ids = new StringBuilder();
         for (int i=0; i<schedules.size(); i++) {
             ids.append(schedules.get(i).getId());
             if (i!=schedules.size()-1)
                 ids.append(", ");
         }
-        String scheduleSql = "SELECT tpb FROM TicketPerBranch tpb WHERE tpb.schedule.id IN ("+ids.toString()+") AND tpb.station.id IN (:depStation, :arrStation)";
+        String left = "select tpb.arriveTime from TicketPerBranch tpb where tpb.station.id=:depStation and tpb.schedule.id in ("+ids.toString()+")";
+        String right = "select tpb.arriveTime from TicketPerBranch tpb where tpb.station.id=:arrStation and tpb.schedule.id in ("+ids.toString()+")";
+        String scheduleSql = "SELECT tpb FROM TicketPerBranch tpb WHERE tpb.schedule.id IN ("+ids.toString()+") AND tpb.arriveTime BETWEEN ("+left+") AND ("+right+")";
         System.out.println(scheduleSql);
         query = manager.createQuery(scheduleSql);
         query.setParameter("depStation", depStation.getId());
@@ -694,8 +725,7 @@ public class DBHandle {
             float distance = current.arrStation.getTotalDistance() - current.depStation.getTotalDistance();
             current.price = distance*current.arrStation.getSchedule().getPricePerKm();
             result.add(current);
-        }
-        return result;
+        }*/
     }
     /**
      * Покупка билета
@@ -705,18 +735,19 @@ public class DBHandle {
     public void buyTicket(PrepareTicketResult request) {
         if (currentUser==null)
             throw new IllegalArgumentException("Авторизуйтесь для покупки билета");
-        String sql = "UPDATE TicketPerBranch tpb SET tpb.amount=tpb.amount+1 WHERE tpb.schedule.id=:schedule_id";
+        String sql = "UPDATE TicketPerBranch tpb SET tpb.amount=tpb.amount+1 WHERE tpb.schedule.id=:scheduleId AND tpb.arriveTime BETWEEN :depTime AND :arrTime";
         Query query = manager.createQuery(sql);
-        System.out.println("Schedule: "+request.arrStation.getSchedule().getId());
-        query.setParameter("schedule_id", request.arrStation.getSchedule().getId());
+        query.setParameter("scheduleId", request.arrStation.getSchedule().getId());
+        query.setParameter("depTime", request.depStation.getArriveTime());
+        query.setParameter("arrTime", request.arrStation.getArriveTime());
         manager.getTransaction().begin();
         query.executeUpdate();
-        System.out.println("updated");
+        System.out.println("Tpb is updated");
         manager.flush();
         Ticket ticket = new Ticket(request.depStation.getStation(),request.arrStation.getStation(), request.arrStation.getSchedule(), currentUser, request.price);
         System.out.println(ticket.toString());
         manager.persist(ticket);
-        System.out.println("ticket persisted");
+        System.out.println("Ticket persisted");
         manager.getTransaction().commit();
         
     }
