@@ -1,6 +1,8 @@
 package kiri.mavenproject1;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
@@ -12,16 +14,14 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import java.time.Duration;
-import java.time.LocalDateTime;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
 
 public class AdminPage extends JDialog {
     DBHandle handle;
     RouteStationsPanel routeStationsPnl;
-    DateTimeBox trainDepBox;
-    // Класс для вывода узла марштрута
+    JComboBox<Route> routeCombo;
+    
     class RouteNodePanel extends JPanel {
         private JComboBox<Station> stationCombo;
         private final DateTimeBox stayTimeBox;
@@ -108,10 +108,10 @@ public class AdminPage extends JDialog {
         public RouteStationsPanel(Route route,List<RailwaySystem> railwaySystem) throws ParseException {
             this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
             this.railwaySystem = railwaySystem;
-            nodes = new ArrayList<RouteNodePanel>();
+            nodes = new ArrayList<>();
             if (route!=null) {
-                this.setRailwaySystem(railwaySystem);
-                this.setRoute(route);
+                this.railwaySystem = railwaySystem;
+                currentRoute = route;
             }
         }
         // При изменении станции узла обновляется список доступых значений для следующего узла
@@ -151,7 +151,7 @@ public class AdminPage extends JDialog {
                 RouteNodePanel lastNode = this.nodes.get(lastIndex);
                 RouteStation lastRs = lastNode.getRouteStation();
                 List<Station> availables = this.getSuitableFor(lastRs.getStation());
-                if (availables.size()==0)
+                if (availables.isEmpty())
                     throw new IllegalArgumentException("Нет доступных веток из данной станции");
                 if (rs == null) {
                     rs = new RouteStation();
@@ -170,7 +170,7 @@ public class AdminPage extends JDialog {
                 }
             }));
             this.nodes.add(node);
-            this.add(node);
+            this.add(node,Component.CENTER_ALIGNMENT);
             if (validate)
                 this.validate();
         }
@@ -184,18 +184,27 @@ public class AdminPage extends JDialog {
         }
         // удаление всех узлов
         public void removeAllNodes() {
-            for (int i=0; i<=this.nodes.size();i++)
+            while (!this.nodes.isEmpty())
                 removeNode();
         }
         // задание текущего мартрута
-        public void setRoute(Route route) throws ParseException {
-            this.currentRoute = route;
-            List<RouteStation> routeStations = handle.getRouteStationsByRoute(route);
-            this.removeAllNodes();
-            for (RouteStation rs: routeStations) {
-                addNode(rs,false);
+        public void setRoute(Route route) {
+            try {
+                this.currentRoute = route;
+                List<RouteStation> routeStations = handle.getRouteStationsByRoute(route);
+                this.removeAllNodes();
+                for (RouteStation rs: routeStations) {
+                    addNode(rs,false);
+                }
+                this.validate();
             }
-            routeStationsPanel.validate();
+            catch (Throwable exc) {
+                Utils.showMessage(this,exc.getMessage(),"",true);
+            }
+        }
+        public void setDefaultRoute() {
+            Route route = (Route)routeCombo.getSelectedItem();
+            setRoute(route);
         }
         // изменение ж\д системы
         public void setRailwaySystem(List<RailwaySystem> railwaySystem) {
@@ -230,7 +239,7 @@ public class AdminPage extends JDialog {
             }
             return result;
         }
-    }
+    }    
     /**
      * Creates new form NewJFrame
      * @param handle - класс работы с б\д
@@ -242,11 +251,14 @@ public class AdminPage extends JDialog {
         super(owner,type);
         this.handle = handle;
         initComponents();
-        this.routeStationsPanel.setLayout(new BoxLayout(routeStationsPanel,BoxLayout.Y_AXIS));
-        trainDepBox = new DateTimeBox(2);
-        trainDepBox.setDateTime(LocalDateTime.now());
+        this.routePanel.setLayout(new BoxLayout(routePanel,BoxLayout.Y_AXIS));
+        this.nodesPanel.setLayout(new BoxLayout(nodesPanel,BoxLayout.Y_AXIS));
+        this.loadRouteList();
         routeStationsPnl = new RouteStationsPanel((Route)this.routeCombo.getSelectedItem(),handle.getRailwaySystem());
-        this.routeStationsPanel.add(this.routeStationsPnl);
+        this.nodesPanel.add(this.routeStationsPnl);
+        routeStationsPnl.setDefaultRoute();
+        if (handle.getUserRole().getId()!=1)
+            this.userEditBtn.setEnabled(false);
         this.validate();
     }
 
@@ -262,20 +274,18 @@ public class AdminPage extends JDialog {
         jLabel1 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
-        jPanel7 = new javax.swing.JPanel();
-        addRouteBtn = new javax.swing.JButton();
-        jLabel14 = new javax.swing.JLabel();
+        jPanel4 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jPanel2 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         addRouteNodeBtn = new javax.swing.JButton();
         RemoveRouteNodeBtn = new javax.swing.JButton();
         saveRouteStationsBtn = new javax.swing.JButton();
-        routeCombo = new javax.swing.JComboBox<>();
         jLabel5 = new javax.swing.JLabel();
-        routeStationsPanel = new javax.swing.JPanel();
+        routePanel = new javax.swing.JPanel();
+        nodesPanel = new javax.swing.JPanel();
         showRoutesBtn = new javax.swing.JButton();
-        showRoutesBtn2 = new javax.swing.JButton();
+        userEditBtn = new javax.swing.JButton();
         showRoutesBtn3 = new javax.swing.JButton();
         entityEditBtn = new javax.swing.JButton();
 
@@ -285,44 +295,22 @@ public class AdminPage extends JDialog {
 
         jLabel6.setText("jLabel6");
 
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 100, Short.MAX_VALUE)
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 100, Short.MAX_VALUE)
+        );
+
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
                 formComponentShown(evt);
             }
         });
-
-        jPanel7.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 1, true));
-
-        addRouteBtn.setText("Добавить");
-        addRouteBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addRouteBtnActionPerformed(evt);
-            }
-        });
-
-        jLabel14.setText("Добавление маршрута");
-
-        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
-        jPanel7.setLayout(jPanel7Layout);
-        jPanel7Layout.setHorizontalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel7Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel14)
-                .addContainerGap(99, Short.MAX_VALUE))
-            .addGroup(jPanel7Layout.createSequentialGroup()
-                .addComponent(addRouteBtn)
-                .addGap(0, 0, Short.MAX_VALUE))
-        );
-        jPanel7Layout.setVerticalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel14)
-                .addGap(26, 26, 26)
-                .addComponent(addRouteBtn)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         jPanel2.setAutoscrolls(true);
@@ -352,25 +340,28 @@ public class AdminPage extends JDialog {
             }
         });
 
-        routeCombo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                routeComboActionPerformed(evt);
-            }
-        });
-
         jLabel5.setText("Маршрут");
 
-        routeStationsPanel.setForeground(javax.swing.UIManager.getDefaults().getColor("Button.highlight"));
+        javax.swing.GroupLayout routePanelLayout = new javax.swing.GroupLayout(routePanel);
+        routePanel.setLayout(routePanelLayout);
+        routePanelLayout.setHorizontalGroup(
+            routePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 100, Short.MAX_VALUE)
+        );
+        routePanelLayout.setVerticalGroup(
+            routePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 24, Short.MAX_VALUE)
+        );
 
-        javax.swing.GroupLayout routeStationsPanelLayout = new javax.swing.GroupLayout(routeStationsPanel);
-        routeStationsPanel.setLayout(routeStationsPanelLayout);
-        routeStationsPanelLayout.setHorizontalGroup(
-            routeStationsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        javax.swing.GroupLayout nodesPanelLayout = new javax.swing.GroupLayout(nodesPanel);
+        nodesPanel.setLayout(nodesPanelLayout);
+        nodesPanelLayout.setHorizontalGroup(
+            nodesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 0, Short.MAX_VALUE)
         );
-        routeStationsPanelLayout.setVerticalGroup(
-            routeStationsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 112, Short.MAX_VALUE)
+        nodesPanelLayout.setVerticalGroup(
+            nodesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 442, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -382,16 +373,17 @@ public class AdminPage extends JDialog {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel3)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(routeStationsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(0, 525, Short.MAX_VALUE))
+                    .addComponent(nodesPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(saveRouteStationsBtn, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(RemoveRouteNodeBtn, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jLabel5)
-                    .addComponent(routeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(addRouteNodeBtn, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(saveRouteStationsBtn, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(RemoveRouteNodeBtn, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jLabel5)
+                        .addComponent(addRouteNodeBtn, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(routePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -404,15 +396,15 @@ public class AdminPage extends JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(routeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(routePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(addRouteNodeBtn)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(RemoveRouteNodeBtn)
                         .addGap(32, 32, 32)
                         .addComponent(saveRouteStationsBtn))
-                    .addComponent(routeStationsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(324, Short.MAX_VALUE))
+                    .addComponent(nodesPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(24, Short.MAX_VALUE))
         );
 
         jScrollPane1.setViewportView(jPanel2);
@@ -424,10 +416,10 @@ public class AdminPage extends JDialog {
             }
         });
 
-        showRoutesBtn2.setText("редактировать пользователя");
-        showRoutesBtn2.addActionListener(new java.awt.event.ActionListener() {
+        userEditBtn.setText("редактировать пользователя");
+        userEditBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                showRoutesBtn2ActionPerformed(evt);
+                userEditBtnActionPerformed(evt);
             }
         });
 
@@ -451,47 +443,38 @@ public class AdminPage extends JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 792, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(entityEditBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(showRoutesBtn3, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(showRoutesBtn2, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(userEditBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(showRoutesBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(showRoutesBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 383, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                .addGap(6, 6, 6)
+                .addComponent(jScrollPane1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(showRoutesBtn)
-                    .addComponent(showRoutesBtn2)
+                    .addComponent(userEditBtn)
                     .addComponent(showRoutesBtn3)
                     .addComponent(entityEditBtn))
-                .addContainerGap(22, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
     // При показе формы обновляем все данные
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
-        try {
-            this.refreshData();
-            this.refreshRoutePanel();
-        }
-        catch (Throwable exc) {
-            Utils.showMessage(this,exc.getMessage(),"",true);
-        }
+        
     }//GEN-LAST:event_formComponentShown
     // добавление нового маршрута в б\д
     private void addRouteNodeBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addRouteNodeBtnActionPerformed
@@ -513,36 +496,17 @@ public class AdminPage extends JDialog {
             Utils.showMessage(this,exc.getMessage(),"",true);
         }
     }//GEN-LAST:event_RemoveRouteNodeBtnActionPerformed
-    // нажатие кнопки добавления узла маршрута
-    private void addRouteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addRouteBtnActionPerformed
-        try {
-            Route route = new Route();
-            handle.addRoute(route);
-            routeCombo.addItem(route);
-            Utils.showMessage(this,"Маршрут успешно добавлен","",false);
-        }
-        catch (Throwable exc) {
-            Utils.showMessage(this,exc.getMessage(),"",true);
-        }
-    }//GEN-LAST:event_addRouteBtnActionPerformed
-    // нажатие кнопки сохранения выбранных узлов маршрута
+
+   // нажатие кнопки сохранения выбранных узлов маршрута
     private void saveRouteStationsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveRouteStationsBtnActionPerformed
         try {
             this.handle.resetRouteStations(this.routeStationsPnl.getRouteStations());
+            Utils.showMessage(this, "Изменения сохранены","",false);
         } 
         catch (Throwable exc) {
             Utils.showMessage(this,exc.getMessage(),"",true);
         }
     }//GEN-LAST:event_saveRouteStationsBtnActionPerformed
-    // изменение маршрута для редактирования
-    private void routeComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_routeComboActionPerformed
-        try {
-            Route selected = (Route)this.routeCombo.getSelectedItem();
-            this.routeStationsPnl.setRoute(selected);
-        } catch (ParseException ex) {
-            Utils.showMessage(this,ex.getMessage(),"",true);
-        }
-    }//GEN-LAST:event_routeComboActionPerformed
 
    // открытие модального окна показа существующих маршрутов
     private void showRoutesBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showRoutesBtnActionPerformed
@@ -552,12 +516,12 @@ public class AdminPage extends JDialog {
         routes.dispose(); 
     }//GEN-LAST:event_showRoutesBtnActionPerformed
 
-    private void showRoutesBtn2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showRoutesBtn2ActionPerformed
+    private void userEditBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_userEditBtnActionPerformed
         UserManagementPage ump = new UserManagementPage(handle,this);
         ump.setDefaultCloseOperation(HIDE_ON_CLOSE);
         ump.setVisible(true);
         ump.dispose();
-    }//GEN-LAST:event_showRoutesBtn2ActionPerformed
+    }//GEN-LAST:event_userEditBtnActionPerformed
 
     private void showRoutesBtn3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showRoutesBtn3ActionPerformed
         CustomQueryPage ump = new CustomQueryPage(handle,this);
@@ -570,64 +534,55 @@ public class AdminPage extends JDialog {
         BranchEditPage bep = new BranchEditPage(handle,this);
         bep.setDefaultCloseOperation(HIDE_ON_CLOSE);
         bep.setVisible(true);
+        this.routeStationsPnl.setRailwaySystem(handle.getRailwaySystem());
+        this.loadRouteList();
         bep.dispose();
     }//GEN-LAST:event_entityEditBtnActionPerformed
 
     /**
      * Обновление всех данных окна
      */
-    
-    private void loadInOutStations() {
-        List<Station> stations = handle.getStations();
+    private void refreshForm() {
+        this.validate();
     }
     private void loadRouteList() {
-        this.routeCombo.removeAllItems();
-        List<Route> routes = handle.getRoutes();
-        for (Route route: routes) {
-            this.routeCombo.addItem(route);
-        }
-    }
-    private void refreshData() {
         try {
-            loadInOutStations();
-            loadRouteList();
+            Route[] routes = Utils.toRouteArray(handle.getRoutes());
+            routePanel.removeAll();
+            routeCombo = new JComboBox(routes);
+            routeCombo.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    routeStationsPnl.setDefaultRoute();
+                    refreshForm();
+                }
+                
+            });
+            routePanel.add(routeCombo);
         }
         catch (Throwable exc) {
-            Utils.traceAllErrors(exc);
-            Utils.showMessage(this,"Ошибка при обновлении","",true);
-        }
-    }
-    // обновление панели резактирования маршрута
-    private void refreshRoutePanel() throws ParseException {
-        Route route = (Route)routeCombo.getSelectedItem();
-        if (route!=null) {
-            List<RailwaySystem> railwaySystem = handle.getRailwaySystem();
-            routeStationsPnl.setRailwaySystem(railwaySystem);
-            routeStationsPnl.setRoute(route);
-            this.routeStationsPanel.validate();
+            Utils.showMessage(this,exc.getMessage(),"",true);
         }
     }
     
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton RemoveRouteNodeBtn;
-    private javax.swing.JButton addRouteBtn;
     private javax.swing.JButton addRouteNodeBtn;
     private javax.swing.JButton entityEditBtn;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel7;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JComboBox<Route> routeCombo;
-    private javax.swing.JPanel routeStationsPanel;
+    private javax.swing.JPanel nodesPanel;
+    private javax.swing.JPanel routePanel;
     private javax.swing.JButton saveRouteStationsBtn;
     private javax.swing.JButton showRoutesBtn;
-    private javax.swing.JButton showRoutesBtn2;
     private javax.swing.JButton showRoutesBtn3;
+    private javax.swing.JButton userEditBtn;
     // End of variables declaration//GEN-END:variables
 }

@@ -1,0 +1,214 @@
+class RouteNodePanel extends JPanel {
+        private JComboBox<Station> stationCombo;
+        private final DateTimeBox stayTimeBox;
+        private final DateTimeBox timeToComeBox;
+        private RouteStation routeStation;
+        public RouteNodePanel(List<Station> stations, Station currentStation, RouteStation routeStation) {
+            this.setLayout(new BoxLayout(this,BoxLayout.X_AXIS));
+            stationCombo = new JComboBox<>();
+            this.add(stationCombo);
+            stayTimeBox = new DateTimeBox(1);
+            timeToComeBox = new DateTimeBox(1);
+            this.add(new LabeledComponent("Станция",stationCombo));
+            this.add(new LabeledComponent("Время стоянки",stayTimeBox));
+            this.add(new LabeledComponent("Время в пути",timeToComeBox));
+            setRouteStation(routeStation,stations);
+            this.validate();
+        }
+        public void setFirst() {
+            stayTimeBox.setEnabled(false);
+            timeToComeBox.setEnabled(false);
+        }
+        public void setLast() {
+            stayTimeBox.setEnabled(false);
+        }
+        public void setSelectAction(ActionListener al) {
+            for (ActionListener l: stationCombo.getActionListeners())
+                stationCombo.removeActionListener(l);
+            this.stationCombo.addActionListener(al);
+        }
+        // Изменения узла маршрута, описываемого данным компонентом
+        // availables - спсиок станций, доступных из данной станции в маршруте
+        public void setRouteStation(RouteStation rs, List<Station> availables) {
+            this.routeStation = rs;
+            this.stayTimeBox.setDuration(rs.getStayTime());
+            this.timeToComeBox.setDuration(rs.getTimeToCome());
+            updateStations(availables);
+            if (rs.getStation()!=null)
+                this.stationCombo.setSelectedItem((Station)rs.getStation());
+        }
+        public void updateValues(List<Station> stations, Station currentStation, Route route, int order) {
+            updateStations(stations);
+            stationCombo.setSelectedItem((Station)currentStation);
+            routeStation.setRoute(route);
+            routeStation.setStationOrder(order);
+        }
+        public void updateValues(List<Station> stations, Route route, int order) {
+            updateStations(stations);
+            routeStation.setRoute(route);
+            routeStation.setStationOrder(order);
+        }
+        public void updateValues(List<Station> stations, int order) {
+            updateStations(stations);
+            routeStation.setStationOrder(order);
+        }
+        public void updateStations(List<Station> stations) {
+            Station selected = (Station)stationCombo.getSelectedItem();
+            stationCombo.removeAllItems();
+            stations.forEach((station) -> {
+                stationCombo.addItem(station);
+                if (station == selected)
+                    stationCombo.setSelectedItem(station);
+            });
+        }
+        public int getOrder() {
+            return this.routeStation.getStationOrder();
+        }
+        public void setStation(Station s) {
+            this.routeStation.setStation(s);
+        }
+        public RouteStation getRouteStation() throws ParseException {
+            this.routeStation.setTimeToCome(timeToComeBox.getDuration());
+            this.routeStation.setStation((Station)this.stationCombo.getSelectedItem());
+            this.routeStation.setStayTime(stayTimeBox.getDuration());
+            System.out.println("added routeStation "+routeStation.toString());
+            return routeStation;
+        }
+    }
+    // Класс-контейнер для узлов машрута
+    class RouteStationsPanel extends JPanel {
+        private List<RailwaySystem> railwaySystem;
+        private ArrayList<RouteNodePanel> nodes;
+        private Route currentRoute;
+        // Задается текущий маршрут, система ж\д веток, с помощью которых строится маршрут
+        public RouteStationsPanel(Route route,List<RailwaySystem> railwaySystem) throws ParseException {
+            this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
+            this.railwaySystem = railwaySystem;
+            nodes = new ArrayList<RouteNodePanel>();
+            if (route!=null) {
+                this.setRailwaySystem(railwaySystem);
+                this.setRoute(route);
+            }
+        }
+        // При изменении станции узла обновляется список доступых значений для следующего узла
+        // Если в обновленном списке присутствует ранне выбранный узел, то он сохраняется таковым
+        private void setAvailableStation(ActionEvent evt) {
+            try {
+                JComboBox<Station> src = (JComboBox<Station>)evt.getSource();
+                RouteNodePanel node = (RouteNodePanel)(((Component)src.getParent()).getParent());
+                Station station = (Station)src.getSelectedItem();
+                node.setStation(station);
+                RouteStationsPanel parent = (RouteStationsPanel)node.getParent();
+                for (RouteNodePanel cnode: parent.nodes)
+                    if (cnode.getOrder()==node.getOrder()+1)
+                        cnode.updateStations(this.getSuitableFor(station));
+                System.out.print("set station");
+            }
+            catch (Throwable exc) {
+                System.out.println(exc.getMessage());
+            }
+        }
+        // Добавление узла
+        public void addNode(RouteStation rs, boolean validate) throws ParseException {
+            int lastIndex = this.nodes.size()-1;
+            RouteNodePanel node;
+            if (lastIndex==-1) {
+                if (rs == null) {
+                    rs = new RouteStation();
+                    rs.setTimeToCome(Duration.ZERO);
+                    rs.setStayTime(Duration.ZERO);
+                    rs.setRoute(currentRoute);
+                    rs.setStation(null);
+                    rs.setStationOrder(1);
+                }
+                System.out.println("added rs with 1st order");
+                node = new RouteNodePanel(getSuitableFor(null),null,rs);
+            } else {
+                RouteNodePanel lastNode = this.nodes.get(lastIndex);
+                RouteStation lastRs = lastNode.getRouteStation();
+                List<Station> availables = this.getSuitableFor(lastRs.getStation());
+                if (availables.isEmpty())
+                    throw new IllegalArgumentException("Нет доступных веток из данной станции");
+                if (rs == null) {
+                    rs = new RouteStation();
+                    rs.setRoute(this.currentRoute);
+                    rs.setTimeToCome(lastRs.getTimeToCome());
+                    rs.setStayTime(lastRs.getStayTime());
+                    rs.setStationOrder(lastNode.getOrder()+1);
+                }
+                System.out.println("added rs with "+rs.getStationOrder()+" order");
+                node = new RouteNodePanel(availables,availables.get(0),rs);
+            }
+            node.setSelectAction((new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent evt) {
+                    setAvailableStation(evt);
+                }
+            }));
+            this.nodes.add(node);
+            this.add(node);
+            if (validate)
+                this.validate();
+        }
+        // удаление узла
+        public void removeNode() {
+            int lastIndex = this.nodes.size()-1;
+            if (lastIndex==-1)
+                return;
+            this.remove(this.nodes.get(lastIndex));
+            this.nodes.remove(lastIndex);
+        }
+        // удаление всех узлов
+        public void removeAllNodes() {
+            for (int i=0; i<=this.nodes.size();i++)
+                removeNode();
+        }
+        // задание текущего мартрута
+        public void setRoute(Route route) {
+            try {
+                this.currentRoute = route;
+                List<RouteStation> routeStations = handle.getRouteStationsByRoute(route);
+                this.removeAllNodes();
+                for (RouteStation rs: routeStations) {
+                    addNode(rs,false);
+                }
+                routeStationsPanel.validate();
+            }
+            catch (Throwable exc) {
+                Utils.showMessage(this,exc.getMessage(),"",true);
+            }
+        }
+        // изменение ж\д системы
+        public void setRailwaySystem(List<RailwaySystem> railwaySystem) {
+            this.railwaySystem = railwaySystem;
+        }
+        // поиск доступных узлов для станции
+        private List<Station> getSuitableFor(Station node) {
+            if (node == null) {
+                return handle.getStations();
+            } else {
+                List<Station> result = new ArrayList<>();
+                for (RailwaySystem branch: railwaySystem) {
+                    if (node.equals(branch.getInStation())) {
+                        result.add(branch.getOutStation());
+                    }
+                    else if (node.equals(branch.getOutStation())) {
+                        result.add(branch.getInStation());
+                    }
+                }
+                return result;
+            }
+        }
+        // Извлечение выбранных станций
+        public List<Object> getRouteStations() throws ParseException {
+            List<Object> result = new ArrayList<>();
+            int order = 1;
+            for (RouteNodePanel node: nodes) {
+                RouteStation rs = node.getRouteStation();
+                rs.setStationOrder(order);
+                result.add(rs);
+                order++;
+            }
+            return result;
+        }
+    }

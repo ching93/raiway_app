@@ -27,7 +27,7 @@ public class RouteStation {
     @Column(name="stationOrder")
     private int stationOrder;
     @NotNull
-    @ManyToOne
+    @ManyToOne(cascade=CascadeType.REMOVE)
     private Route route = new Route();
     @NotNull
     @ManyToOne

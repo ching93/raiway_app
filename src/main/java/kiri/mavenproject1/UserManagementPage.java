@@ -215,7 +215,7 @@ public class UserManagementPage extends JDialog {
         User user = this.userModel.getUser();
         user.setRole((Role)this.userRoleCombo.getSelectedItem());
         try {
-            handle.updateEntity(user);
+            handle.addNewUser(user);
             Utils.showMessage(this, "данные пользователя успешно обновлены", "", false);
         }
         catch (Throwable exc) {

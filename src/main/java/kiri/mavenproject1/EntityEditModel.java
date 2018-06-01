@@ -17,7 +17,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import kiri.mavenproject1.entities.*;
 
-enum EntityType {BRANCHES, STATIONS, TRAINS, TRAINTYPES, SCHEDULES, ROLES, TRAINCREWS };
+enum EntityType {BRANCHES, STATIONS, TRAINS, TRAINTYPES, SCHEDULES, ROLES, TRAINCREWS, ROUTES };
 /**
  *
  * @author User
@@ -166,6 +166,12 @@ public class EntityEditModel extends AbstractTableModel  {
                 case TRAINCREWS:
                     columnNames = new String[] {"#","Сотрудник","Поезд"};
                     break;
+                case ROUTES:
+                    columnNames = new String[] {"#"};
+                    break;
+                case ROLES:
+                    columnNames = new String[] {"#","Название"};
+                    break;
             }
         }
         public EntityType getEntityType() {
@@ -205,6 +211,10 @@ public class EntityEditModel extends AbstractTableModel  {
                     return getTrainTypeValueAt(rowIndex,columnIndex);
                 case TRAINCREWS:
                     return getTrainCrewValueAt(rowIndex,columnIndex);
+                case ROUTES:
+                    return getRouteValueAt(rowIndex,columnIndex);
+                case ROLES:
+                    return getRoleValueAt(rowIndex,columnIndex);
                 default:
                     return "dicks";
             }
@@ -295,6 +305,26 @@ public class EntityEditModel extends AbstractTableModel  {
                     return "th";
             }
         }
+        private Object getRouteValueAt(int rowIndex, int columnIndex) {
+            Route route = (Route)entities.get(rowIndex);
+            switch (columnIndex) {
+                case 0:
+                    return route.getId();
+                default:
+                    return "th";
+            }
+        }
+        private Object getRoleValueAt(int rowIndex, int columnIndex) {
+            Role role = (Role)entities.get(rowIndex);
+            switch (columnIndex) {
+                case 0:
+                    return role.getId();
+                case 1:
+                    return role.getName();
+                default:
+                    return "th";
+            }
+        }
         
         @Override
         public void setValueAt(Object value, int rowIndex, int columnIndex) {
@@ -311,6 +341,8 @@ public class EntityEditModel extends AbstractTableModel  {
                     setTrainTypeValueAt(value, rowIndex,columnIndex); break;
                 case TRAINCREWS:
                     setTrainCrewValueAt(value, rowIndex,columnIndex); break;
+                case ROLES:
+                    setRoleValueAt(value, rowIndex,columnIndex); break;
             }
             changedRows.set(rowIndex, true);
         }
@@ -343,7 +375,7 @@ public class EntityEditModel extends AbstractTableModel  {
             // {"#","Задержка", "Время отправления","Цена одного километра","Маршрут","Поезд"}
             switch (columnIndex) {
                 case 1:
-                    sh.setDelay(Duration.ofMinutes((Long)value)); break;
+                    sh.setDelay(Duration.ofMinutes((Long)Long.parseLong((String)value))); break;
                 case 2:
                     sh.setDepartureTime(LocalDateTime.parse((String)value)); break;
                 case 3:
@@ -372,6 +404,10 @@ public class EntityEditModel extends AbstractTableModel  {
                 case 2:
                     tc.setTrain((Train)value); break;
             }
+        }
+        private void setRoleValueAt(Object value, int rowIndex, int columnIndex) {
+            Role role = (Role)entities.get(rowIndex);
+            role.setName((String)value);
         }
         public Iterable<Object> getChangedValues() {
             List<Object> result = new ArrayList<>();
@@ -415,8 +451,18 @@ public class EntityEditModel extends AbstractTableModel  {
                     tc.setId(-1);
                     this.entities.add(tc);
                     break;
+                case ROUTES:
+                    Route route = (Route)value;
+                    route.setId(-1);
+                    this.entities.add(route);
+                    break;
+                case ROLES:
+                    Role role = (Role)value;
+                    role.setId(-1);
+                    this.entities.add(role);
+                    break;
             }
-            this.changedRows.add(false);
+            this.changedRows.add(true);
             this.fireTableRowsInserted(this.getRowCount()-1, this.getRowCount()-1);
             
         }

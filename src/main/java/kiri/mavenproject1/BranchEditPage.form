@@ -90,13 +90,15 @@
     <Component class="javax.swing.JComboBox" name="entitySelectCombo">
       <Properties>
         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-          <StringArray count="6">
+          <StringArray count="8">
             <StringItem index="0" value="&#x412;&#x435;&#x442;&#x43a;&#x438;"/>
             <StringItem index="1" value="&#x421;&#x442;&#x430;&#x43d;&#x446;&#x438;&#x438;"/>
             <StringItem index="2" value="&#x41f;&#x43e;&#x435;&#x437;&#x434;&#x430;"/>
             <StringItem index="3" value="&#x41e;&#x442;&#x43f;&#x440;&#x430;&#x432;&#x43b;&#x435;&#x43d;&#x438;&#x44f;"/>
             <StringItem index="4" value="&#x422;&#x438;&#x43f;&#x44b; &#x43f;&#x43e;&#x435;&#x437;&#x434;&#x43e;&#x432;"/>
             <StringItem index="5" value="&#x42d;&#x43a;&#x438;&#x43f;&#x430;&#x436;&#x438; &#x43f;&#x43e;&#x435;&#x437;&#x434;&#x43e;&#x432;"/>
+            <StringItem index="6" value="&#x41c;&#x430;&#x440;&#x448;&#x440;&#x443;&#x442;&#x44b;"/>
+            <StringItem index="7" value="&#x420;&#x43e;&#x43b;&#x438;"/>
           </StringArray>
         </Property>
       </Properties>

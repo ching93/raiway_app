@@ -28,7 +28,6 @@ class DateTimeBox extends JPanel {
         private JTextField dayBox;
         private JTextField hourBox;
         private JTextField minBox;
-        private JTextField secBox;
         private int type;
         public DateTimeBox(int type) {
             this.setBorder(new LineBorder(new java.awt.Color(0, 0, 0), 1, true));
@@ -42,29 +41,24 @@ class DateTimeBox extends JPanel {
             }
             hourBox = new JTextField(); this.add(new LabeledComponent("ЧЧ",hourBox));
             minBox = new JTextField(); this.add(new LabeledComponent("мм",minBox));
-            secBox = new JTextField(); this.add(new LabeledComponent("СС",secBox));
             this.validate();
         }
         public Duration getDuration() {
-            int hour=0; int min=0; int sec=0;
             if (type==1) {
-                hour = Integer.parseInt(hourBox.getText());
-                min = Integer.parseInt(minBox.getText());
-                sec = Integer.parseInt(secBox.getText());
-                Duration result = Duration.ZERO.plusHours(hour).plusMinutes(min).plusSeconds(sec);
+                int hour = Integer.parseInt(hourBox.getText());
+                int min = Integer.parseInt(minBox.getText());
+                Duration result = Duration.ZERO.plusHours(hour).plusMinutes(min);
                 return result;
             }
             throw new IllegalArgumentException("Доступно только время");
         }
         public LocalDateTime getDateTime() {
-            int year=0; int month=0; int day=0; int hour=0; int min=0; int sec=0;
-            year = Integer.parseInt(yearBox.getText());
-            month = Integer.parseInt(monthBox.getText());
-            day = Integer.parseInt(dayBox.getText());
-            hour = Integer.parseInt(hourBox.getText());
-            min = Integer.parseInt(minBox.getText());
-            sec = Integer.parseInt(secBox.getText());
-            LocalDateTime result = LocalDateTime.of(year, month, month, hour, min);
+            int year = Integer.parseInt(yearBox.getText());
+            int month = Integer.parseInt(monthBox.getText());
+            int day = Integer.parseInt(dayBox.getText());
+            int hour = Integer.parseInt(hourBox.getText());
+            int min = Integer.parseInt(minBox.getText());
+            LocalDateTime result = LocalDateTime.of(year, month, day, hour, min);
             return result;
         }
         public void setDateTime(LocalDateTime date) {
@@ -75,16 +69,13 @@ class DateTimeBox extends JPanel {
             dayBox.setText(Integer.toString(date.getDayOfMonth()));
             hourBox.setText(Integer.toString(date.getHour()));
             minBox.setText(Integer.toString(date.getMinute()));
-            secBox.setText(Integer.toString(date.getSecond()));
         }
         public void setDuration(Duration time) {
             if (type==1) {
                 long hours = time.toHours();
                 long minutes = time.toMinutes() - hours*60;
-                long secs = time.getSeconds() - hours*60 - minutes*60;
                 hourBox.setText(Long.toString(hours));
                 minBox.setText(Long.toString(minutes));
-                secBox.setText(Long.toString(secs));
             }
             if (type==2)
                 throw new IllegalArgumentException("Доступно только время");

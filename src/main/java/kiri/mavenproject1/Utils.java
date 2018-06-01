@@ -6,7 +6,14 @@
 package kiri.mavenproject1;
 
 import java.awt.Component;
+import java.util.List;
 import javax.swing.JOptionPane;
+import kiri.mavenproject1.entities.RailwaySystem;
+import kiri.mavenproject1.entities.Route;
+import kiri.mavenproject1.entities.Station;
+import kiri.mavenproject1.entities.Train;
+import kiri.mavenproject1.entities.TrainType;
+import kiri.mavenproject1.entities.User;
 
 /**
  *
@@ -24,5 +31,41 @@ public class Utils {
                 if (exc==null)
                     break;
             }
-    } 
+    }
+    public static Station[] toStationArray(List<Station> list) {
+        Station[] res = new Station[list.size()];
+        for (int i=0; i<list.size(); i++)
+            res[i]=list.get(i);
+        return res;
+    }
+    private RailwaySystem[] toBranchesArray(List<RailwaySystem> list) {
+        RailwaySystem[] res = new RailwaySystem[list.size()];
+        for (int i=0; i<list.size(); i++)
+            res[i]=list.get(i);
+        return res;
+    }
+    public static Train[] toTrainArray(List<Train> list) {
+        Train[] res = new Train[list.size()];
+        for (int i=0; i<list.size(); i++)
+            res[i]=list.get(i);
+        return res;
+    }
+    public static TrainType[] toTrainTypeArray(List<TrainType> list) {
+        TrainType[] res = new TrainType[list.size()];
+        for (int i=0; i<list.size(); i++)
+            res[i]=list.get(i);
+        return res;
+    }
+    public static Route[] toRouteArray(List<Route> list) {
+        Route[] res = new Route[list.size()];
+        for (int i=0; i<list.size(); i++)
+            res[i]=list.get(i);
+        return res;
+    }
+    public static User[] toUserArray(List<User> list) {
+        User[] res = new User[list.size()];
+        for (int i=0; i<list.size(); i++)
+            res[i]=list.get(i);
+        return res;
+    }
 }

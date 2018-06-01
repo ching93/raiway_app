@@ -30,7 +30,7 @@ public class Schedule {
     @Column(name="departureTime")
     private LocalDateTime departureTime;
     @NotNull
-    @ManyToOne(cascade=CascadeType.REMOVE)
+    @ManyToOne
     private Train train = new Train();
     @Column(name="delay")
     private Duration delay;

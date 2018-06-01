@@ -40,49 +40,14 @@ public class BranchEditPage extends JDialog {
         this.handle = handle;
         loadBranchModel();
     }
-    private Station[] toStationArray(List<Station> list) {
-        Station[] res = new Station[list.size()];
-        for (int i=0; i<list.size(); i++)
-            res[i]=list.get(i);
-        return res;
-    }
-    private RailwaySystem[] toBranchesArray(List<RailwaySystem> list) {
-        RailwaySystem[] res = new RailwaySystem[list.size()];
-        for (int i=0; i<list.size(); i++)
-            res[i]=list.get(i);
-        return res;
-    }
-    private Train[] toTrainArray(List<Train> list) {
-        Train[] res = new Train[list.size()];
-        for (int i=0; i<list.size(); i++)
-            res[i]=list.get(i);
-        return res;
-    }
-    private TrainType[] toTrainTypeArray(List<TrainType> list) {
-        TrainType[] res = new TrainType[list.size()];
-        for (int i=0; i<list.size(); i++)
-            res[i]=list.get(i);
-        return res;
-    }
-    private Route[] toRouteArray(List<Route> list) {
-        Route[] res = new Route[list.size()];
-        for (int i=0; i<list.size(); i++)
-            res[i]=list.get(i);
-        return res;
-    }
-    private User[] toUserArray(List<User> list) {
-        User[] res = new User[list.size()];
-        for (int i=0; i<list.size(); i++)
-            res[i]=list.get(i);
-        return res;
-    }
+    
     
     private void loadBranchModel() {
         List<RailwaySystem> branches = handle.getRailwaySystem();
         List<Object> items = new ArrayList<>();
         for (int i=branches.size()-1; i>=0; i--)
             items.add((Object)branches.get(i));
-        Station[] stations = toStationArray(handle.getStations());
+        Station[] stations = Utils.toStationArray(handle.getStations());
         editModel = new EntityEditModel(items, EntityType.BRANCHES);
         this.resultTbl.setModel(editModel);
         TableColumn col = this.resultTbl.getColumnModel().getColumn(1);
@@ -106,7 +71,7 @@ public class BranchEditPage extends JDialog {
         List<Object> items = new ArrayList<>();
         for (int i=trains.size()-1; i>=0; i--)
             items.add((Object)trains.get(i));
-        TrainType[] ttypes = toTrainTypeArray(handle.getTrainTypes());
+        TrainType[] ttypes = Utils.toTrainTypeArray(handle.getTrainTypes());
         editModel = new EntityEditModel(items,EntityType.TRAINS);
         this.resultTbl.setModel(editModel);
         TableColumn col = this.resultTbl.getColumnModel().getColumn(1);
@@ -121,11 +86,11 @@ public class BranchEditPage extends JDialog {
             items.add((Object)schedules.get(i));
         editModel = new EntityEditModel(items, EntityType.SCHEDULES);
         this.resultTbl.setModel(editModel);
-        Train[] trains = toTrainArray(handle.getTrains());
+        Train[] trains = Utils.toTrainArray(handle.getTrains());
         TableColumn col = this.resultTbl.getColumnModel().getColumn(5);
         col.setCellEditor(new TrainEditor(trains));
         col.setCellRenderer(new TrainRenderer(trains));
-        Route[] routes = toRouteArray(handle.getRoutes());
+        Route[] routes = Utils.toRouteArray(handle.getRoutes());
         TableColumn col1 = this.resultTbl.getColumnModel().getColumn(4);
         col1.setCellEditor(new RouteEditor(routes));
         col1.setCellRenderer(new RouteRenderer(routes));
@@ -147,15 +112,33 @@ public class BranchEditPage extends JDialog {
             items.add((Object)trainCrews.get(i));
         editModel = new EntityEditModel(items,EntityType.TRAINCREWS);
         this.resultTbl.setModel(editModel);
-        Train[] trains = toTrainArray(handle.getTrains());
+        Train[] trains = Utils.toTrainArray(handle.getTrains());
         TableColumn col = this.resultTbl.getColumnModel().getColumn(2);
         col.setCellEditor(new TrainEditor(trains));
         col.setCellRenderer(new TrainRenderer(trains));
         resultTbl.setRowHeight(25);
-        User[] employees = toUserArray(handle.getEmployees());
+        User[] employees = Utils.toUserArray(handle.getEmployees());
         TableColumn col1 = this.resultTbl.getColumnModel().getColumn(1);
         col1.setCellEditor(new UserEditor(employees));
         col1.setCellRenderer(new UserRenderer(employees));
+        resultTbl.setRowHeight(25);
+    }
+    private void loadRouteModel() {
+        List<Route> routes = handle.getRoutes();
+        List<Object> items = new ArrayList<>();
+        for (int i=routes.size()-1; i>=0; i--)
+            items.add((Object)routes.get(i));
+        editModel = new EntityEditModel(items,EntityType.ROUTES);
+        this.resultTbl.setModel(editModel);
+        resultTbl.setRowHeight(25);
+    }
+    private void loadRoleModel() {
+        List<Role> roles = handle.getRoles();
+        List<Object> items = new ArrayList<>();
+        for (int i=roles.size()-1; i>=0; i--)
+            items.add((Object)roles.get(i));
+        editModel = new EntityEditModel(items,EntityType.ROLES);
+        this.resultTbl.setModel(editModel);
         resultTbl.setRowHeight(25);
     }
     /**
@@ -189,7 +172,7 @@ public class BranchEditPage extends JDialog {
         resultTbl.setRowHeight(22);
         jScrollPane1.setViewportView(resultTbl);
 
-        entitySelectCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Ветки", "Станции", "Поезда", "Отправления", "Типы поездов", "Экипажи поездов" }));
+        entitySelectCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Ветки", "Станции", "Поезда", "Отправления", "Типы поездов", "Экипажи поездов", "Маршруты", "Роли" }));
         entitySelectCombo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 entitySelectComboActionPerformed(evt);
@@ -276,6 +259,10 @@ public class BranchEditPage extends JDialog {
                 loadTrainTypesModel(); break;
             case 5:
                 loadTrainCrewModel(); break;
+            case 6:
+                loadRouteModel(); break;
+            case 7:
+                loadRoleModel(); break;
         }
     }//GEN-LAST:event_entitySelectComboActionPerformed
 
@@ -284,11 +271,13 @@ public class BranchEditPage extends JDialog {
             Iterable<Object> toUpdate = editModel.getChangedValues();
             switch (editModel.getEntityType()) {
                 case BRANCHES: handle.addRailwaySystem(toUpdate); break;
-                case STATIONS: handle.addStation(toUpdate); break;
+                case STATIONS: handle.addStations(toUpdate); break;
                 case SCHEDULES: handle.addSchedules(toUpdate); break;
-                case TRAINTYPES: handle.updateEntities(toUpdate); break;
-                case TRAINS: handle.updateEntities(toUpdate); break;
-                case TRAINCREWS: handle.updateEntities(toUpdate); break;
+                case TRAINTYPES: handle.addTrainTypes(toUpdate); break;
+                case TRAINS: handle.addTrains(toUpdate); break;
+                case TRAINCREWS: handle.addTrainCrews(toUpdate); break;
+                case ROUTES: handle.addRoutes(toUpdate); break;
+                case ROLES: handle.addRoles(toUpdate); break;
             }
             //Iterable<Object> toInsert = editModel.getValuesToInsert();
             //handle.InsertBatchEntities(toInsert);
@@ -307,9 +296,18 @@ public class BranchEditPage extends JDialog {
         if (res== JOptionPane.OK_OPTION) {
             try {
                 List<Object> entities = editModel.getRows(rows);
-                handle.removeEntities(entities);
+                switch (editModel.getEntityType()) {
+                    case BRANCHES: handle.removeBranches(entities); break;
+                    case STATIONS: handle.removeStations(entities); break;
+                    case TRAINTYPES: handle.removeTrainTypes(entities); break;
+                    case TRAINCREWS: handle.removeTrainCrews(entities); break;
+                    case TRAINS: handle.removeTrains(entities); break;
+                    case ROLES: handle.removeRoles(entities); break;
+                    case ROUTES: handle.removeRoutes(entities); break;
+                    case SCHEDULES: handle.removeSchedules(entities); break;
+                }
                 editModel.removeRows(rows);
-                Utils.showMessage(this, "Успешно удалены строки", "", false);
+                Utils.showMessage(this, "Успешно удалены"+entities.size()+" строк(и)", "", false);
             } catch (Throwable exc) {
                 Utils.showMessage(this, "Нельзя удалить", "", true);
                 Utils.traceAllErrors(exc);
@@ -382,6 +380,17 @@ public class BranchEditPage extends JDialog {
                     tc.setTrain(trains1.get(0));
                     tc.setId(-1);
                     editModel.addRow(tc);
+                    break;
+                case ROUTES:
+                    Route route = new Route();
+                    route.setId(-1);
+                    editModel.addRow(route);
+                    break;
+                case ROLES:
+                    Role role = new Role();
+                    role.setId(-1);
+                    role.setName("Название роли");
+                    editModel.addRow(role);
                     break;
             }
         }
