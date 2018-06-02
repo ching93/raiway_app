@@ -18,7 +18,7 @@
       <property name="javax.persistence.jdbc.driver_class" value="oracle.jdbc.OracleDriver"/>
       <!--<property name="javax.persistence.jdbc.url" value="jdbc:mysql://127.0.0.1:3306/railway?serverTimezone=UTC"/>-->
       <!--<property name="javax.persistence.jdbc.url" value="jdbc:oracle:thin:@localhost:1521:xe"/>-->
-      <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
+      <!--<property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>-->
       <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect"/>
       <property name="javax.persistence.jdbc.user" value="SYSTEM"/>
       <property name="javax.persistence.jdbc.password" value="1211"/>

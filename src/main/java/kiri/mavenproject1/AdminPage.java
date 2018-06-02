@@ -137,6 +137,7 @@ public class AdminPage extends JDialog {
             if (lastIndex==-1) {
                 if (rs == null) {
                     rs = new RouteStation();
+                    rs.setId(-1);
                     rs.setTimeToCome(Duration.ZERO);
                     rs.setStayTime(Duration.ZERO);
                     rs.setRoute(currentRoute);
@@ -153,6 +154,7 @@ public class AdminPage extends JDialog {
                     throw new IllegalArgumentException("Нет доступных веток из данной станции");
                 if (rs == null) {
                     rs = new RouteStation();
+                    rs.setId(-1);
                     rs.setRoute(this.currentRoute);
                     rs.setTimeToCome(lastRs.getTimeToCome());
                     rs.setStayTime(lastRs.getStayTime());

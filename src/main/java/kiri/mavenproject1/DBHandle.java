@@ -397,6 +397,7 @@ public class DBHandle {
         // Заполняем поле пути до станции от начачальной точки маршрута
         List<RailwaySystem> branches = this.getRailwaySystem();
         List<Object> toUpdate = new ArrayList<>();
+        //List<Object> toInsert = new ArrayList<>();
         RouteStation prevRs = (RouteStation)ee.get(0);
         toUpdate.add(prevRs);
         float distance = 0;
@@ -410,11 +411,11 @@ public class DBHandle {
         }
         List<RouteStation> rss = this.getRouteStationsByRoute(((RouteStation)ee.get(0)).getRoute());
         List<Object> toDelete = new ArrayList<>();
-        for (RouteStation rs: rss)
-            toDelete.add(rs);
+        if (rss.size()>toUpdate.size())
+            toDelete.addAll(rss.subList(toUpdate.size(), rss.size()));
         this.removeRoutes(toDelete);
-        this.InsertEntities(toUpdate);
-        
+        this.updateEntities(toUpdate);
+        //this.InsertEntities(toInsert);
     }
     /**
      * Добавление нового отправления
