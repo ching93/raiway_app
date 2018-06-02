@@ -58,13 +58,13 @@ public class signInPage extends JDialog {
         jLabel3 = new javax.swing.JLabel();
         lastnameBox = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        passwordBox = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
-        passwordRepeatBox = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
         emailBox = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
         roleBox = new javax.swing.JComboBox<>();
+        passwordBox = new javax.swing.JPasswordField();
+        passwordRepeatBox = new javax.swing.JPasswordField();
 
         setTitle("Регистрация");
 
@@ -77,7 +77,7 @@ public class signInPage extends JDialog {
             }
         });
 
-        okBtn.setText("Войти");
+        okBtn.setText("Зарегистрироваться");
         okBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 okBtnActionPerformed(evt);
@@ -103,25 +103,25 @@ public class signInPage extends JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(lastnameBox, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
+                    .addComponent(lastnameBox, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(firstnameBox, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
+                    .addComponent(firstnameBox, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(loginBox, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
+                    .addComponent(loginBox, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(passwordBox, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
                     .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(passwordRepeatBox, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
                     .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addComponent(cancelBtn)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(okBtn))
-                    .addComponent(emailBox, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
+                    .addComponent(emailBox, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(roleBox, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(24, Short.MAX_VALUE))
+                    .addComponent(roleBox, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(passwordBox)
+                    .addComponent(passwordRepeatBox))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -140,13 +140,13 @@ public class signInPage extends JDialog {
                 .addComponent(lastnameBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel4)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(passwordBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(11, 11, 11)
                 .addComponent(jLabel5)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(passwordRepeatBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(passwordRepeatBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(emailBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -158,7 +158,7 @@ public class signInPage extends JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(okBtn)
                     .addComponent(cancelBtn))
-                .addGap(38, 38, 38))
+                .addContainerGap())
         );
 
         pack();
@@ -170,8 +170,8 @@ public class signInPage extends JDialog {
     
     private User getUser() {
         String login = this.loginBox.getText();
-        String password = this.passwordBox.getText();
-        String passwordRepeat = this.passwordRepeatBox.getText();
+        char[] password = this.passwordBox.getPassword();
+        char[] passwordRepeat = this.passwordRepeatBox.getPassword();
         if (!password.equals(passwordRepeat)) {
             System.out.println(password);
             System.out.println(passwordRepeat);
@@ -187,7 +187,7 @@ public class signInPage extends JDialog {
         user.setLogin(login);
         user.setFirstname(firstname);
         user.setLastname(lastname);
-        user.setPassword(password);
+        user.setPassword(String.valueOf(password, 0, password.length));
         user.setRole(role);
         user.setEmail(email);
         return user;
@@ -221,8 +221,8 @@ public class signInPage extends JDialog {
     private javax.swing.JTextField lastnameBox;
     private javax.swing.JTextField loginBox;
     private javax.swing.JButton okBtn;
-    private javax.swing.JTextField passwordBox;
-    private javax.swing.JTextField passwordRepeatBox;
+    private javax.swing.JPasswordField passwordBox;
+    private javax.swing.JPasswordField passwordRepeatBox;
     private javax.swing.JComboBox<Role> roleBox;
     // End of variables declaration//GEN-END:variables
 }

@@ -41,12 +41,12 @@ public class AuthPage extends javax.swing.JDialog {
 
         jLabel1 = new javax.swing.JLabel();
         loginBox = new javax.swing.JTextField();
-        passwordBox = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         okBtn = new javax.swing.JButton();
         cancelBtn = new javax.swing.JButton();
         saveChkBox = new javax.swing.JCheckBox();
         okBtn1 = new javax.swing.JButton();
+        passwordBox = new javax.swing.JPasswordField();
 
         setTitle("Аутентификация");
 
@@ -85,19 +85,22 @@ public class AuthPage extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(passwordBox)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(saveChkBox)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(okBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(loginBox, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1)
-                    .addComponent(passwordBox, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(cancelBtn)
-                        .addGap(20, 20, 20)
-                        .addComponent(okBtn)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(saveChkBox)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(okBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(loginBox, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel1)
+                            .addComponent(jLabel2)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(cancelBtn)
+                                .addGap(20, 20, 20)
+                                .addComponent(okBtn)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -126,13 +129,16 @@ public class AuthPage extends javax.swing.JDialog {
 
     private void okBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okBtnActionPerformed
         String login = this.loginBox.getText();
-        String password = this.passwordBox.getText();
+        char[] password = this.passwordBox.getPassword();
         boolean save = this.saveChkBox.isSelected();
-        if (handle.logIn(login, password,save))
+        if (handle.logIn(login, String.valueOf(password, 0, password.length),save)) {
             isLogged = true;
-        else
+            this.setVisible(false);
+        }
+        else {
             isLogged = false;
-        this.setVisible(false);
+            Utils.showMessage(this, "Неправильный пароль или логин", "", true);
+        }
     }//GEN-LAST:event_okBtnActionPerformed
 
     private void cancelBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelBtnActionPerformed
@@ -162,7 +168,7 @@ public class AuthPage extends javax.swing.JDialog {
     private javax.swing.JTextField loginBox;
     private javax.swing.JButton okBtn;
     private javax.swing.JButton okBtn1;
-    private javax.swing.JTextField passwordBox;
+    private javax.swing.JPasswordField passwordBox;
     private javax.swing.JCheckBox saveChkBox;
     // End of variables declaration//GEN-END:variables
 }

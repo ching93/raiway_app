@@ -38,10 +38,11 @@
                       <Component id="adminPageBtn" alignment="0" max="32767" attributes="0"/>
                       <Component id="signInBtn" alignment="0" max="32767" attributes="0"/>
                       <Component id="logOutBtn" alignment="0" max="32767" attributes="0"/>
+                      <Component id="profileBtn" alignment="0" max="32767" attributes="0"/>
                   </Group>
                   <Component id="buyBtn1" min="-2" pref="137" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace pref="12" max="32767" attributes="0"/>
+              <EmptySpace pref="20" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -65,6 +66,8 @@
               <Component id="adminPageBtn" min="-2" max="-2" attributes="0"/>
               <EmptySpace min="-2" pref="26" max="-2" attributes="0"/>
               <Component id="logOutBtn" min="-2" max="-2" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+              <Component id="profileBtn" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="32767" attributes="0"/>
               <Component id="buyBtn1" min="-2" pref="30" max="-2" attributes="0"/>
               <EmptySpace min="-2" pref="75" max="-2" attributes="0"/>
@@ -351,7 +354,7 @@
     </Component>
     <Component class="javax.swing.JButton" name="adminPageBtn">
       <Properties>
-        <Property name="text" type="java.lang.String" value="&lt;html&gt;&#x41f;&#x430;&#x43d;&#x435;&#x43b;&#x44c;&lt;br&gt;&#x430;&#x434;&#x43c;&#x438;&#x43d;&#x438;&#x441;&#x442;&#x440;&#x430;&#x442;&#x43e;&#x440;&#x430;&lt;/html&gt;"/>
+        <Property name="text" type="java.lang.String" value="&#x41f;&#x430;&#x43d;&#x435;&#x43b;&#x44c; &#x430;&#x434;&#x43c;&#x438;&#x43d;&#x438;&#x441;&#x442;&#x440;&#x430;&#x442;&#x43e;&#x440;&#x430;"/>
         <Property name="enabled" type="boolean" value="false"/>
       </Properties>
       <Events>
@@ -375,6 +378,15 @@
       </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="userDataLbl">
+    </Component>
+    <Component class="javax.swing.JButton" name="profileBtn">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="&#x41f;&#x440;&#x43e;&#x444;&#x438;&#x43b;&#x44c;"/>
+        <Property name="enabled" type="boolean" value="false"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="profileBtnActionPerformed"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>

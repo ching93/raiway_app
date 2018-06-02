@@ -66,6 +66,8 @@ public class TicketPage extends JFrame {
         @Override
         public void setValueAt(Object value, int rowIndex, int columnIndex) {
             selectedRow = selectedRow == rowIndex ? -1 : rowIndex;
+            for (int i=0; i< getRowCount(); i++)
+                this.fireTableCellUpdated(i, 0);
         }
         @Override
         public String getColumnName(int columnIndex) {
@@ -170,6 +172,7 @@ public class TicketPage extends JFrame {
         signInBtn = new javax.swing.JButton();
         logInBtn = new javax.swing.JButton();
         userDataLbl = new javax.swing.JLabel();
+        profileBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Покупка билета");
@@ -355,7 +358,7 @@ public class TicketPage extends JFrame {
             }
         });
 
-        adminPageBtn.setText("<html>Панель<br>администратора</html>");
+        adminPageBtn.setText("Панель администратора");
         adminPageBtn.setEnabled(false);
         adminPageBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -377,6 +380,14 @@ public class TicketPage extends JFrame {
             }
         });
 
+        profileBtn.setText("Профиль");
+        profileBtn.setEnabled(false);
+        profileBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                profileBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -391,11 +402,12 @@ public class TicketPage extends JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addComponent(logInBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(adminPageBtn)
+                        .addComponent(adminPageBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(signInBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(logOutBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(logOutBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(profileBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(buyBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(12, Short.MAX_VALUE))
+                .addContainerGap(20, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -413,9 +425,11 @@ public class TicketPage extends JFrame {
                 .addGap(18, 18, 18)
                 .addComponent(signInBtn)
                 .addGap(21, 21, 21)
-                .addComponent(adminPageBtn, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(adminPageBtn)
                 .addGap(26, 26, 26)
                 .addComponent(logOutBtn)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(profileBtn)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(buyBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(75, 75, 75))
@@ -483,6 +497,7 @@ public class TicketPage extends JFrame {
         this.logOutBtn.setEnabled(false);
         this.buyBtn1.setEnabled(false);
         this.adminPageBtn.setEnabled(false);
+        this.profileBtn.setEnabled(false);
         this.userDataLbl.setText("");
     }//GEN-LAST:event_logOutBtnActionPerformed
 
@@ -503,6 +518,13 @@ public class TicketPage extends JFrame {
     private void applyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_applyBtnActionPerformed
         showAvailableRoutes();
     }//GEN-LAST:event_applyBtnActionPerformed
+
+    private void profileBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_profileBtnActionPerformed
+        ProfilePage page = new ProfilePage(handle,this);
+        page.setDefaultCloseOperation(HIDE_ON_CLOSE);
+        page.setVisible(true);
+        page.dispose(); 
+    }//GEN-LAST:event_profileBtnActionPerformed
     
     private void logIn() {
         try {
@@ -511,6 +533,7 @@ public class TicketPage extends JFrame {
                 this.showStations();
                 this.logOutBtn.setEnabled(true);
                 this.buyBtn1.setEnabled(true);
+                this.profileBtn.setEnabled(true);
                 if (handle.getUserRole().getId()<=2)
                     this.adminPageBtn.setEnabled(true);
                 else
@@ -553,6 +576,7 @@ public class TicketPage extends JFrame {
     private javax.swing.JButton logInBtn;
     private javax.swing.JButton logOutBtn;
     private javax.swing.JCheckBox priceSortBox;
+    private javax.swing.JButton profileBtn;
     private javax.swing.JTable resultTable;
     private javax.swing.JPanel rightBorderPnl;
     private javax.swing.JButton signInBtn;

@@ -214,6 +214,13 @@ public class DBHandle {
         }
         this.InsertEntity(user);
     }
+    public void updateUser(User toUpdate) {
+        if (this.currentUser!=null && currentUser.getId()==toUpdate.getId()) {
+            this.updateEntity(toUpdate);
+        }
+        else
+            throw new IllegalArgumentException("Нельзя сохранить");
+    }
     public List<User> getEmployees () {
         checkUserRights(1);
         Query q = manager.createQuery("select u from User u where u.role.id=2");
@@ -258,6 +265,12 @@ public class DBHandle {
             manager.getTransaction().rollback();
             throw new IllegalArgumentException("Нельзя удалить объект");
         }
+    }
+    public List<Ticket> getTicketsOfUser(User user) {
+        Query q = manager.createQuery("select t from Ticket t where t.consumer.id = :userId");
+        q.setParameter("userId", user.getId());
+        List<Ticket> result = q.getResultList();
+        return result;
     }
     private void removeEntity(Object entity) {
         try {
@@ -688,53 +701,10 @@ public class DBHandle {
             }
         }
         if (sortByPrice!=0)
-            result.sort(new Comparator<PrepareTicketResult>() {
-                @Override
-                public int compare(PrepareTicketResult o1, PrepareTicketResult o2) {
-                    return o1.price > o2.price ? sortByPrice : sortByPrice*(-1);
-                }
-
-            });
+            result.sort((PrepareTicketResult o1, PrepareTicketResult o2) -> o1.price > o2.price ? sortByPrice : sortByPrice*(-1));
         if (sortByDate!=0)
-            result.sort(new Comparator<PrepareTicketResult>() {
-                @Override
-                public int compare(PrepareTicketResult o1, PrepareTicketResult o2) {
-                    return o1.depStation.getArriveTime().isBefore(o2.depStation.getArriveTime()) ? sortByDate : sortByDate*(-1);
-                }
-
-            });
+            result.sort((PrepareTicketResult o1, PrepareTicketResult o2) -> o1.depStation.getArriveTime().isBefore(o2.depStation.getArriveTime()) ? sortByDate : sortByDate*(-1));
         return result;
-        /*StringBuilder ids = new StringBuilder();
-        for (int i=0; i<schedules.size(); i++) {
-            ids.append(schedules.get(i).getId());
-            if (i!=schedules.size()-1)
-                ids.append(", ");
-        }
-        String left = "select tpb.arriveTime from TicketPerBranch tpb where tpb.station.id=:depStation and tpb.schedule.id in ("+ids.toString()+")";
-        String right = "select tpb.arriveTime from TicketPerBranch tpb where tpb.station.id=:arrStation and tpb.schedule.id in ("+ids.toString()+")";
-        String scheduleSql = "SELECT tpb FROM TicketPerBranch tpb WHERE tpb.schedule.id IN ("+ids.toString()+") AND tpb.arriveTime BETWEEN ("+left+") AND ("+right+")";
-        System.out.println(scheduleSql);
-        query = manager.createQuery(scheduleSql);
-        query.setParameter("depStation", depStation.getId());
-        query.setParameter("arrStation", arrStation.getId());
-        List<TicketPerBranch> scheduleStations = query.getResultList();
-        if (scheduleStations.isEmpty())
-            return null;
-        List<PrepareTicketResult> result = new ArrayList<>();
-        for (Schedule schedule: schedules) {
-            PrepareTicketResult current = new PrepareTicketResult();
-            for (TicketPerBranch tpb: scheduleStations) {
-                if (tpb.getSchedule().getId()!=schedule.getId())
-                    continue;
-                if (tpb.getStation().getId()==depStation.getId())
-                    current.depStation = tpb;
-                else
-                    current.arrStation = tpb;
-            }
-            float distance = current.arrStation.getTotalDistance() - current.depStation.getTotalDistance();
-            current.price = distance*current.arrStation.getSchedule().getPricePerKm();
-            result.add(current);
-        }*/
     }
     /**
      * Покупка билета
@@ -757,6 +727,27 @@ public class DBHandle {
         System.out.println(ticket.toString());
         manager.persist(ticket);
         System.out.println("Ticket persisted");
+        manager.getTransaction().commit();
+        
+    }
+    public void returnTicket(Ticket ticket) {
+        if (LocalDateTime.now().isAfter(ticket.getSchedule().getDepartureTime()))
+            throw new IllegalArgumentException("Поезд уже выехал");
+        manager.getTransaction().begin();
+        String fromSql = "select tpb1.totalDistance from TicketPerBranch tpb1 where tpb1.schedule.id=:scheduleId and tpb1.station.id=:from";
+        String toSql = "select tpb1.totalDistance from TicketPerBranch tpb1 where tpb1.schedule.id=:scheduleId and tpb1.station.id=:to";
+        Query q = manager.createQuery("UPDATE TicketPerBranch tpb SET tpb.amount=tpb.amount-1 WHERE tpb.schedule.id=:scheduleId AND tpb.totalDistance BETWEEN ("+fromSql+") AND ("+toSql+")");
+        q.setParameter("scheduleId", ticket.getSchedule().getId());
+        q.setParameter("from", ticket.getDepStation().getId());
+        q.setParameter("to", ticket.getDepStation().getId());
+        int row = q.executeUpdate();
+        manager.flush();
+        System.out.println("Удалено "+row+" строк");
+        q = manager.createQuery("delete from Ticket t where t.id=:id");
+        q.setParameter("id", ticket.getId());
+        row = q.executeUpdate();
+        System.out.println("Удалено "+row+" строк");
+        manager.flush();
         manager.getTransaction().commit();
         
     }
