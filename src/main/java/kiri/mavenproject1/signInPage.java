@@ -60,11 +60,11 @@ public class signInPage extends JDialog {
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
-        emailBox = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
         roleBox = new javax.swing.JComboBox<>();
         passwordBox = new javax.swing.JPasswordField();
         passwordRepeatBox = new javax.swing.JPasswordField();
+        emailBox = new javax.swing.JPasswordField();
 
         setTitle("Регистрация");
 
@@ -116,11 +116,11 @@ public class signInPage extends JDialog {
                         .addComponent(cancelBtn)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(okBtn))
-                    .addComponent(emailBox, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(roleBox, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(passwordBox)
-                    .addComponent(passwordRepeatBox))
+                    .addComponent(passwordRepeatBox)
+                    .addComponent(emailBox))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -148,9 +148,9 @@ public class signInPage extends JDialog {
                 .addComponent(passwordRepeatBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel6)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(emailBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(emailBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel7)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(roleBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -172,7 +172,9 @@ public class signInPage extends JDialog {
         String login = this.loginBox.getText();
         char[] password = this.passwordBox.getPassword();
         char[] passwordRepeat = this.passwordRepeatBox.getPassword();
-        if (!password.equals(passwordRepeat)) {
+        String passwordStr = String.valueOf(password, 0, password.length);
+        String passwordRptStr = String.valueOf(passwordRepeat, 0, password.length);
+        if (!passwordStr.equals(passwordRptStr)) {
             System.out.println(password);
             System.out.println(passwordRepeat);
             throw new IllegalArgumentException("Пароли не совпадают");
@@ -187,7 +189,7 @@ public class signInPage extends JDialog {
         user.setLogin(login);
         user.setFirstname(firstname);
         user.setLastname(lastname);
-        user.setPassword(String.valueOf(password, 0, password.length));
+        user.setPassword(passwordStr);
         user.setRole(role);
         user.setEmail(email);
         return user;
@@ -209,7 +211,7 @@ public class signInPage extends JDialog {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelBtn;
-    private javax.swing.JTextField emailBox;
+    private javax.swing.JPasswordField emailBox;
     private javax.swing.JTextField firstnameBox;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

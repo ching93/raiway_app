@@ -40,11 +40,11 @@
                       <EmptySpace max="32767" attributes="0"/>
                       <Component id="okBtn" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <Component id="emailBox" alignment="0" max="32767" attributes="0"/>
                   <Component id="jLabel7" alignment="0" min="-2" max="-2" attributes="0"/>
                   <Component id="roleBox" alignment="0" max="32767" attributes="0"/>
                   <Component id="passwordBox" max="32767" attributes="0"/>
                   <Component id="passwordRepeatBox" max="32767" attributes="0"/>
+                  <Component id="emailBox" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="32767" attributes="0"/>
           </Group>
@@ -75,9 +75,9 @@
               <Component id="passwordRepeatBox" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
-              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Component id="emailBox" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
+              <Component id="emailBox" min="-2" max="-2" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="jLabel7" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="32767" attributes="0"/>
               <Component id="roleBox" min="-2" max="-2" attributes="0"/>
@@ -144,8 +144,6 @@
         <Property name="text" type="java.lang.String" value="&#x412;&#x432;&#x435;&#x434;&#x438;&#x442;&#x435; &#x43f;&#x43e;&#x447;&#x442;&#x443;:"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="emailBox">
-    </Component>
     <Component class="javax.swing.JLabel" name="jLabel7">
       <Properties>
         <Property name="text" type="java.lang.String" value="&#x412;&#x44b;&#x431;&#x435;&#x440;&#x438;&#x442;&#x435; &#x440;&#x43e;&#x43b;&#x44c;:"/>
@@ -164,6 +162,8 @@
     <Component class="javax.swing.JPasswordField" name="passwordBox">
     </Component>
     <Component class="javax.swing.JPasswordField" name="passwordRepeatBox">
+    </Component>
+    <Component class="javax.swing.JPasswordField" name="emailBox">
     </Component>
   </SubComponents>
 </Form>

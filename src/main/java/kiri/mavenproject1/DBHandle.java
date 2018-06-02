@@ -323,6 +323,8 @@ public class DBHandle {
             manager.createNativeQuery("insert into Roles (id,name) values (2,'Manager')").executeUpdate();
             manager.createNativeQuery("insert into Roles (id,name) values (3,'Customer')").executeUpdate();
             manager.flush();
+            manager.createNativeQuery("insert into Users (id,email,firstname,lastname,login,password,role_id) values (0,'no','root','root','root','qwerty1211',1)").executeUpdate();
+            manager.flush();
             manager.getTransaction().commit();
             return getRoles();
         }
