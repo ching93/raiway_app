@@ -432,8 +432,8 @@ public class TicketPage extends JFrame {
         LocalDateTime leftBorder = this.leftBorderBox.getDateTime();
         LocalDateTime rightBorder = this.rightBorderBox.getDateTime();
         try {
-            boolean priceSort = this.priceSortBox.isSelected();
-            boolean dateSort = this.dateSortBox.isSelected();
+            int priceSort = this.priceSortBox.isSelected() ? 1 : 0;
+            int dateSort = this.dateSortBox.isSelected() ? 1 : 0;
             List<PrepareTicketResult> result = handle.prepareBuyTicket(depStation, arrStation, leftBorder, rightBorder,priceSort,dateSort);
             if (result == null || result.isEmpty())
                 Utils.showMessage(this,"Не найдено отправлений с заданными параметрами","",true);

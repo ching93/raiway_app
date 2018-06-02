@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -628,7 +629,7 @@ public class DBHandle {
      * @param rightBorder - правая граница дат
      * @return 
      */
-    public List<PrepareTicketResult> prepareBuyTicket(Station depStation, Station arrStation, LocalDateTime leftBorder, LocalDateTime rightBorder, boolean sortByPrice, boolean sortByDate) {
+    public List<PrepareTicketResult> prepareBuyTicket(Station depStation, Station arrStation, LocalDateTime leftBorder, LocalDateTime rightBorder, int sortByPrice, int sortByDate) {
         if (currentUser==null)
             throw new IllegalArgumentException("Авторизуйтесь для покупки билета");
         Query query;
@@ -641,15 +642,7 @@ public class DBHandle {
         // у которых есть свободные места
         String priceSql;
         String dateSql;
-        if (sortByPrice)
-            priceSql = ", tpb2.schedule.pricePerKm";
-        else
-            priceSql = "";
-        if (sortByDate)
-            dateSql = ", tpb2.schedule.departureTime";
-        else
-            dateSql="";
-        String hasFreeSpaceSql = "SELECT tpb2 FROM TicketPerBranch tpb2 WHERE tpb2.schedule.id IN ("+bothStations+") AND tpb2.schedule.id IN ("+intervaledSql+") ORDER BY tpb2.schedule.id, tpb2.totalDistance"+priceSql+dateSql; // "+
+        String hasFreeSpaceSql = "SELECT tpb2 FROM TicketPerBranch tpb2 WHERE tpb2.schedule.id IN ("+bothStations+") AND tpb2.schedule.id IN ("+intervaledSql+") ORDER BY tpb2.schedule.id, tpb2.totalDistance"; // "+
                 //"AND MAX(tpb2.amount)<tpb2.schedule.train.capacity";
         // объединяем запрос
         query = manager.createQuery(hasFreeSpaceSql);//"SELECT sh FROM Schedule sh WHERE sh.id IN ("+hasFreeSpaceSql+")");
@@ -694,6 +687,22 @@ public class DBHandle {
                 }
             }
         }
+        if (sortByPrice!=0)
+            result.sort(new Comparator<PrepareTicketResult>() {
+                @Override
+                public int compare(PrepareTicketResult o1, PrepareTicketResult o2) {
+                    return o1.price > o2.price ? sortByPrice : sortByPrice*(-1);
+                }
+
+            });
+        if (sortByDate!=0)
+            result.sort(new Comparator<PrepareTicketResult>() {
+                @Override
+                public int compare(PrepareTicketResult o1, PrepareTicketResult o2) {
+                    return o1.depStation.getArriveTime().isBefore(o2.depStation.getArriveTime()) ? sortByDate : sortByDate*(-1);
+                }
+
+            });
         return result;
         /*StringBuilder ids = new StringBuilder();
         for (int i=0; i<schedules.size(); i++) {
