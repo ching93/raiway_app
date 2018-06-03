@@ -163,7 +163,7 @@
     </Component>
     <Component class="javax.swing.JPasswordField" name="passwordRepeatBox">
     </Component>
-    <Component class="javax.swing.JPasswordField" name="emailBox">
+    <Component class="javax.swing.JTextField" name="emailBox">
     </Component>
   </SubComponents>
 </Form>

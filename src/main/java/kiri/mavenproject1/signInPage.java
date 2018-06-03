@@ -64,7 +64,7 @@ public class signInPage extends JDialog {
         roleBox = new javax.swing.JComboBox<>();
         passwordBox = new javax.swing.JPasswordField();
         passwordRepeatBox = new javax.swing.JPasswordField();
-        emailBox = new javax.swing.JPasswordField();
+        emailBox = new javax.swing.JTextField();
 
         setTitle("Регистрация");
 
@@ -211,7 +211,7 @@ public class signInPage extends JDialog {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelBtn;
-    private javax.swing.JPasswordField emailBox;
+    private javax.swing.JTextField emailBox;
     private javax.swing.JTextField firstnameBox;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

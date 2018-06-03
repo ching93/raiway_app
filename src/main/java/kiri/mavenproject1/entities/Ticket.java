@@ -42,6 +42,7 @@ public class Ticket {
         this.arrStation = arrStation;
         this.schedule = schedule;
         this.consumer = consumer;
+        this.price = price;
     }
     public void setId(int id) {
         this.id = id;

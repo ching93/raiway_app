@@ -658,8 +658,7 @@ public class DBHandle {
         // у которых есть свободные места
         String priceSql;
         String dateSql;
-        String hasFreeSpaceSql = "SELECT tpb2 FROM TicketPerBranch tpb2 WHERE tpb2.schedule.id IN ("+bothStations+") AND tpb2.schedule.id IN ("+intervaledSql+") ORDER BY tpb2.schedule.id, tpb2.totalDistance"; // "+
-                //"AND MAX(tpb2.amount)<tpb2.schedule.train.capacity";
+        String hasFreeSpaceSql = "SELECT tpb2 FROM TicketPerBranch tpb2 WHERE tpb2.schedule.id IN ("+bothStations+") AND tpb2.schedule.id IN ("+intervaledSql+") ORDER BY tpb2.schedule.id, tpb2.totalDistance";
         // объединяем запрос
         query = manager.createQuery(hasFreeSpaceSql);//"SELECT sh FROM Schedule sh WHERE sh.id IN ("+hasFreeSpaceSql+")");
         query.setParameter("leftBorder", leftBorder);
@@ -714,23 +713,33 @@ public class DBHandle {
      * по заранее подготовленному запросу
      * @param request 
      */
-    public void buyTicket(PrepareTicketResult request) {
+    public void buyTicket(PrepareTicketResult request, int amount) {
         if (currentUser==null)
             throw new IllegalArgumentException("Авторизуйтесь для покупки билета");
-        String sql = "UPDATE TicketPerBranch tpb SET tpb.amount=tpb.amount+1 WHERE tpb.schedule.id=:scheduleId AND tpb.arriveTime BETWEEN :depTime AND :arrTime";
-        Query query = manager.createQuery(sql);
-        query.setParameter("scheduleId", request.arrStation.getSchedule().getId());
-        query.setParameter("depTime", request.depStation.getArriveTime());
-        query.setParameter("arrTime", request.arrStation.getArriveTime());
-        manager.getTransaction().begin();
-        query.executeUpdate();
-        System.out.println("Tpb is updated");
-        manager.flush();
-        Ticket ticket = new Ticket(request.depStation.getStation(),request.arrStation.getStation(), request.arrStation.getSchedule(), currentUser, request.price);
-        System.out.println(ticket.toString());
-        manager.persist(ticket);
-        System.out.println("Ticket persisted");
-        manager.getTransaction().commit();
+        try {
+            String sql = "UPDATE TicketPerBranch tpb SET tpb.amount=tpb.amount+:amount WHERE tpb.schedule.id=:scheduleId AND tpb.arriveTime BETWEEN :depTime AND :arrTime";
+            Query query = manager.createQuery(sql);
+            query.setParameter("scheduleId", request.arrStation.getSchedule().getId());
+            query.setParameter("depTime", request.depStation.getArriveTime());
+            query.setParameter("arrTime", request.arrStation.getArriveTime());
+            query.setParameter("amount", amount);
+            manager.getTransaction().begin();
+            query.executeUpdate();
+            System.out.println("Tpb is updated");
+            manager.flush();
+            for (int i=0; i<amount; i++) {
+                Ticket ticket = new Ticket(request.depStation.getStation(),request.arrStation.getStation(), request.arrStation.getSchedule(), currentUser, request.price);
+                System.out.println(ticket.toString());
+                manager.persist(ticket);
+            }
+            manager.flush();
+            System.out.println("Tickets persisted");
+            manager.getTransaction().commit();
+        }
+        catch (Throwable exc) {
+            Utils.traceAllErrors(exc);
+            throw new IllegalArgumentException("Невозможно купить билет");
+        }
         
     }
     public void returnTicket(Ticket ticket) {

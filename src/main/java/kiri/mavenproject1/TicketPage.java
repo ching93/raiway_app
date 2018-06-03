@@ -13,6 +13,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.table.AbstractTableModel;
 import kiri.mavenproject1.DBHandle.PrepareTicketResult;
 import kiri.mavenproject1.entities.*;
@@ -432,7 +433,7 @@ public class TicketPage extends JFrame {
                 .addComponent(profileBtn)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(buyBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(75, 75, 75))
+                .addGap(30, 30, 30))
         );
 
         pack();
@@ -469,7 +470,9 @@ public class TicketPage extends JFrame {
             Utils.showMessage(this,"Не выбрано значение","",true);
         else
             try {
-                handle.buyTicket(result);
+                String res = JOptionPane.showInputDialog(this, "Введите количество билетов:", "Покупка билета", JOptionPane.OK_CANCEL_OPTION);
+                int amount = Integer.parseInt(res);
+                handle.buyTicket(result,amount);
                 Utils.showMessage(this,"Билет успешно куплен","",false);
             }
         catch (Throwable exc) {
