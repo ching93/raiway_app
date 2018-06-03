@@ -563,6 +563,7 @@ public class AdminPage extends JDialog {
                 
             });
             routePanel.add(routeCombo);
+            this.validate();
         }
         catch (Throwable exc) {
             Utils.showMessage(this,exc.getMessage(),"",true);

@@ -80,7 +80,7 @@ public class TicketPage extends JFrame {
         }
         @Override
         public int getColumnCount() {
-            return 6;
+            return columnNames.length;
         }
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
@@ -94,7 +94,7 @@ public class TicketPage extends JFrame {
                 case 1:
                     return current.arrStation.getSchedule().getRoute().toString();
                 case 2:
-                    return current.arrStation.getSchedule().getDepartureTime().toString();
+                    return current.depStation.getArriveTime().toString();
                 case 3:
                     return current.arrStation.getArriveTime().toString();
                 case 4:
@@ -471,6 +471,8 @@ public class TicketPage extends JFrame {
         else
             try {
                 String res = JOptionPane.showInputDialog(this, "Введите количество билетов:", "Покупка билета", JOptionPane.OK_CANCEL_OPTION);
+                if (res==null)
+                    return;
                 int amount = Integer.parseInt(res);
                 handle.buyTicket(result,amount);
                 Utils.showMessage(this,"Билет успешно куплен","",false);

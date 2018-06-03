@@ -651,6 +651,8 @@ public class DBHandle {
     public List<PrepareTicketResult> prepareBuyTicket(Station depStation, Station arrStation, LocalDateTime leftBorder, LocalDateTime rightBorder, int sortByPrice, int sortByDate) {
         if (currentUser==null)
             throw new IllegalArgumentException("Авторизуйтесь для покупки билета");
+        if (depStation.getId()==arrStation.getId())
+            throw new IllegalArgumentException("Одинаковые станции отправления и прибытия");
         Query query;
         // Выбор маршрутов, в которых присутствует начальная станция
         String arrStationsSql = "SELECT DISTINCT tpb.schedule.id FROM TicketPerBranch tpb WHERE tpb.station.id=:arrStationId";
