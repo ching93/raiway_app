@@ -5,6 +5,7 @@
  */
 package kiri.mavenproject1;
 
+import Utils.Utils;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -431,26 +432,47 @@ public class DBHandle {
         checkUserRights(2);
         manager.getTransaction().begin();
         //List<Object> toUpdate = new ArrayList<>();
-        for (Object item: schedules) {
-            Schedule schedule = (Schedule)item;
-            schedule = manager.merge(schedule);
-            manager.flush();
-            List<RouteStation> rs = this.getRouteStationsByRoute(schedule.getRoute());
-            LocalDateTime d = schedule.getDepartureTime();
-            for (int i=0; i<rs.size(); i++) {
-                RouteStation node = rs.get(i);
+        try {
+            for (Object item: schedules) {
+                Schedule schedule = (Schedule)item;
+                // проверка на наличие других отправлений с тем же поездом с перекрывающейся датой
+                
+                schedule = manager.merge(schedule);
+                manager.flush();
+                List<RouteStation> rs = this.getRouteStationsByRoute(schedule.getRoute());
+                if (rs.isEmpty())
+                    throw new IllegalArgumentException("Маршрут пустой");
+                LocalDateTime d = schedule.getDepartureTime();
                 TicketPerBranch tpb = new TicketPerBranch();
-                tpb.setSchedule(schedule);
-                tpb.setStation(node.getStation());
-                tpb.setAmount(0);
-                tpb.setArriveTime(d);
-                tpb.setTotalDistance(node.getTotalDistance());
-                d = d.plus(rs.get(i).getTimeToCome());
-                manager.merge(tpb);
+                for (int i=0; i<rs.size(); i++) {
+                    RouteStation node = rs.get(i);
+                    tpb = new TicketPerBranch();
+                    tpb.setSchedule(schedule);
+                    tpb.setStation(node.getStation());
+                    tpb.setAmount(0);
+                    tpb.setArriveTime(d);
+                    tpb.setTotalDistance(node.getTotalDistance());
+                    d = d.plus(rs.get(i).getTimeToCome());
+                    manager.merge(tpb);
+                }
+                String arriveTimeSql = "select MAX(tpb.arriveTime) from TicketPerBranch tpb group by tpb.schedule.id having tpb.schedule.id=sh.id";
+                Query q = manager.createQuery("select sh from Schedule sh where sh.train.id=:train_id and sh.departureTime BETWEEN :depTime and :arrTime or ("+arriveTimeSql+") BETWEEN :depTime and :arrTime");
+                q.setParameter("train_id", schedule.getTrain().getId());
+                q.setParameter("depTime", schedule.getDepartureTime());
+                q.setParameter("arrTime", tpb.getArriveTime());
+                List<Schedule> shs = q.getResultList();
+                if (!shs.isEmpty())
+                    throw new IllegalArgumentException("Отправление пересекается с другим");
+                manager.flush();
+                manager.getTransaction().commit();
             }
-            manager.flush();
+        } catch (IllegalArgumentException exc) {
+            throw exc;
+        } catch (Throwable exc) {
+            Utils.traceAllErrors(exc);
+            manager.getTransaction().rollback();
+            throw new IllegalArgumentException("Нельзя вставить");
         }
-        manager.getTransaction().commit();
         //this.updateEntities(schedules);
         //this.updateEntities(toUpdate);
     }
@@ -690,8 +712,9 @@ public class DBHandle {
                 maxFillness=tpbs.get(i).getAmount();
             }
             if (tpbs.get(i).getStation().getId()==arrStation.getId()) {
-                if (maxFillness<=currentSchedule.getTrain().getCapacity()) {
+                if (maxFillness<currentSchedule.getTrain().getCapacity()) {
                     PrepareTicketResult res0 = new PrepareTicketResult();
+                    System.out.println("Max fillness:"+maxFillness);
                     res0.depStation = tpbs.get(rangeBeginIndex);
                     res0.arrStation = tpbs.get(i);
                     res0.placesLeft = currentSchedule.getTrain().getCapacity() - maxFillness;

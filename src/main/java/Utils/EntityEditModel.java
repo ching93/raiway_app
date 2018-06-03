@@ -3,139 +3,23 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package kiri.mavenproject1;
+package Utils;
 
-import java.awt.Component;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.DefaultCellEditor;
-import javax.swing.JComboBox;
-import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellRenderer;
 import kiri.mavenproject1.entities.*;
 
-enum EntityType {BRANCHES, STATIONS, TRAINS, TRAINTYPES, SCHEDULES, ROLES, TRAINCREWS, ROUTES };
+
 /**
  *
  * @author User
  */
-class StationRenderer extends JComboBox implements TableCellRenderer {
-    public StationRenderer(Station[] items) {
-      super(items);
-    }
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-        boolean hasFocus, int row, int column) {
-        if (isSelected) {
-          setForeground(table.getSelectionForeground());
-          super.setBackground(table.getSelectionBackground());
-        } else {
-          setForeground(table.getForeground());
-          setBackground(table.getBackground());
-        }
-        setSelectedItem(value);
-        return this;
-      }
-}
-
-class TrainTypeRenderer extends JComboBox implements TableCellRenderer {
-    public TrainTypeRenderer(TrainType[] items) {
-      super(items);
-    }
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-        boolean hasFocus, int row, int column) {
-        if (isSelected) {
-          setForeground(table.getSelectionForeground());
-          super.setBackground(table.getSelectionBackground());
-        } else {
-          setForeground(table.getForeground());
-          setBackground(table.getBackground());
-        }
-        setSelectedItem(value);
-        return this;
-      }
-}
-class TrainRenderer extends JComboBox implements TableCellRenderer {
-    public TrainRenderer(Train[] items) {
-      super(items);
-    }
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-        boolean hasFocus, int row, int column) {
-        if (isSelected) {
-          setForeground(table.getSelectionForeground());
-          super.setBackground(table.getSelectionBackground());
-        } else {
-          setForeground(table.getForeground());
-          setBackground(table.getBackground());
-        }
-        setSelectedItem(value);
-        return this;
-      }
-}
-class UserRenderer extends JComboBox implements TableCellRenderer {
-    public UserRenderer(User[] items) {
-      super(items);
-    }
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-        boolean hasFocus, int row, int column) {
-        if (isSelected) {
-          setForeground(table.getSelectionForeground());
-          super.setBackground(table.getSelectionBackground());
-        } else {
-          setForeground(table.getForeground());
-          setBackground(table.getBackground());
-        }
-        setSelectedItem(value);
-        return this;
-      }
-}
-class RouteRenderer extends JComboBox implements TableCellRenderer {
-    public RouteRenderer(Route[] items) {
-      super(items);
-    }
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-        boolean hasFocus, int row, int column) {
-        if (isSelected) {
-          setForeground(table.getSelectionForeground());
-          super.setBackground(table.getSelectionBackground());
-        } else {
-          setForeground(table.getForeground());
-          setBackground(table.getBackground());
-        }
-        setSelectedItem(value);
-        return this;
-      }
-}
-
-class StationEditor extends DefaultCellEditor {
-    public StationEditor(Station[] items) {
-        super(new JComboBox(items));
-    }
-}
-class TrainTypeEditor extends DefaultCellEditor {
-    public TrainTypeEditor(TrainType[] items) {
-        super(new JComboBox(items));
-    }
-}
-class TrainEditor extends DefaultCellEditor {
-    public TrainEditor(Train[] items) {
-        super(new JComboBox(items));
-    }
-}
-class UserEditor extends DefaultCellEditor {
-    public UserEditor(User[] items) {
-        super(new JComboBox(items));
-    }
-}
-class RouteEditor extends DefaultCellEditor {
-    public RouteEditor(Route[] items) {
-        super(new JComboBox(items));
-    }
-}
 
 public class EntityEditModel extends AbstractTableModel  {
+        public enum EntityType {BRANCHES, STATIONS, TRAINS, TRAINTYPES, SCHEDULES, ROLES, TRAINCREWS, ROUTES };
         private List<Object> entities;
         private String[] columnNames;
         private EntityType entityType;

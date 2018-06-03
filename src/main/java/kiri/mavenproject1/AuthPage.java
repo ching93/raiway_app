@@ -5,6 +5,7 @@
  */
 package kiri.mavenproject1;
 
+import Utils.Utils;
 import java.awt.Dialog;
 import javax.swing.JDialog;
 import javax.swing.JFrame;

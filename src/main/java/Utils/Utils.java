@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package kiri.mavenproject1;
+package Utils;
 
 import java.awt.Component;
 import java.util.List;

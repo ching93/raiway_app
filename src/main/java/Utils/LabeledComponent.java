@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package kiri.mavenproject1;
+package Utils;
 
 import java.awt.Component;
 import java.awt.Container;
@@ -15,7 +15,7 @@ import javax.swing.JPanel;
  *
  * @author User
  */
-class LabeledComponent extends JPanel {
+public class LabeledComponent extends JPanel {
         private JLabel label;
         private Container comp;
         public LabeledComponent(String label, Container comp) {

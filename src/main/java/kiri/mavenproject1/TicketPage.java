@@ -5,6 +5,8 @@
  */
 package kiri.mavenproject1;
 
+import Utils.DateTimeBox;
+import Utils.Utils;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -455,7 +457,6 @@ public class TicketPage extends JFrame {
             else {
                 resultModel = new ResultTableModel(result);
                 this.resultTable.setModel(resultModel);
-                this.resultTable.validate();
             }
         }
         catch (Throwable exc) {
@@ -474,7 +475,13 @@ public class TicketPage extends JFrame {
                 if (res==null)
                     return;
                 int amount = Integer.parseInt(res);
+                if (amount>result.placesLeft) {
+                    Utils.showMessage(this, "Недостаточно мест", "", true);
+                    return;
+                }
                 handle.buyTicket(result,amount);
+                result.placesLeft-=amount;
+                resultModel.fireTableDataChanged();
                 Utils.showMessage(this,"Билет успешно куплен","",false);
             }
         catch (Throwable exc) {

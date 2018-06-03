@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package kiri.mavenproject1;
+package Utils;
 
 import java.text.DateFormat;
 import java.time.Duration;
@@ -22,7 +22,7 @@ import javax.swing.border.LineBorder;
  *
  * @author User
  */
-class DateTimeBox extends JPanel {
+public class DateTimeBox extends JPanel {
         private JTextField yearBox;
         private JTextField monthBox;
         private JTextField dayBox;

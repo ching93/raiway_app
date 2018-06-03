@@ -5,23 +5,26 @@
  */
 package kiri.mavenproject1;
 
-import java.awt.Component;
+import Utils.StationRenderer;
+import Utils.TrainRenderer;
+import Utils.UserEditor;
+import Utils.TrainTypeRenderer;
+import Utils.EntityEditModel;
+import Utils.RouteEditor;
+import Utils.TrainEditor;
+import Utils.UserRenderer;
+import Utils.RouteRenderer;
+import Utils.TrainTypeEditor;
+import Utils.Utils;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.UnaryOperator;
-import javax.swing.DefaultCellEditor;
-import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import kiri.mavenproject1.entities.*;
-
+import Utils.*;
 /**
  *
  * @author User
@@ -48,7 +51,7 @@ public class BranchEditPage extends JDialog {
         for (int i=branches.size()-1; i>=0; i--)
             items.add((Object)branches.get(i));
         Station[] stations = Utils.toStationArray(handle.getStations());
-        editModel = new EntityEditModel(items, EntityType.BRANCHES);
+        editModel = new EntityEditModel(items, EntityEditModel.EntityType.BRANCHES);
         this.resultTbl.setModel(editModel);
         TableColumn col = this.resultTbl.getColumnModel().getColumn(1);
         col.setCellEditor(new StationEditor(stations));
@@ -63,7 +66,7 @@ public class BranchEditPage extends JDialog {
         List<Object> items = new ArrayList<>();
         for (int i=stations.size()-1; i>=0; i--)
             items.add((Object)stations.get(i));
-        editModel = new EntityEditModel(items, EntityType.STATIONS);
+        editModel = new EntityEditModel(items, EntityEditModel.EntityType.STATIONS);
         this.resultTbl.setModel(editModel);
     }
     private void loadTrainModel() {
@@ -72,7 +75,7 @@ public class BranchEditPage extends JDialog {
         for (int i=trains.size()-1; i>=0; i--)
             items.add((Object)trains.get(i));
         TrainType[] ttypes = Utils.toTrainTypeArray(handle.getTrainTypes());
-        editModel = new EntityEditModel(items,EntityType.TRAINS);
+        editModel = new EntityEditModel(items,EntityEditModel.EntityType.TRAINS);
         this.resultTbl.setModel(editModel);
         TableColumn col = this.resultTbl.getColumnModel().getColumn(1);
         col.setCellEditor(new TrainTypeEditor(ttypes));
@@ -84,7 +87,7 @@ public class BranchEditPage extends JDialog {
         List<Object> items = new ArrayList<>();
         for (int i=schedules.size()-1; i>=0; i--)
             items.add((Object)schedules.get(i));
-        editModel = new EntityEditModel(items, EntityType.SCHEDULES);
+        editModel = new EntityEditModel(items, EntityEditModel.EntityType.SCHEDULES);
         this.resultTbl.setModel(editModel);
         Train[] trains = Utils.toTrainArray(handle.getTrains());
         TableColumn col = this.resultTbl.getColumnModel().getColumn(5);
@@ -101,7 +104,7 @@ public class BranchEditPage extends JDialog {
         List<Object> items = new ArrayList<>();
         for (int i=trainTypes.size()-1; i>=0; i--)
             items.add((Object)trainTypes.get(i));
-        editModel = new EntityEditModel(items,EntityType.TRAINTYPES);
+        editModel = new EntityEditModel(items,EntityEditModel.EntityType.TRAINTYPES);
         this.resultTbl.setModel(editModel);
         resultTbl.setRowHeight(25);
     }
@@ -110,7 +113,7 @@ public class BranchEditPage extends JDialog {
         List<Object> items = new ArrayList<>();
         for (int i=trainCrews.size()-1; i>=0; i--)
             items.add((Object)trainCrews.get(i));
-        editModel = new EntityEditModel(items,EntityType.TRAINCREWS);
+        editModel = new EntityEditModel(items,EntityEditModel.EntityType.TRAINCREWS);
         this.resultTbl.setModel(editModel);
         Train[] trains = Utils.toTrainArray(handle.getTrains());
         TableColumn col = this.resultTbl.getColumnModel().getColumn(2);
@@ -128,7 +131,7 @@ public class BranchEditPage extends JDialog {
         List<Object> items = new ArrayList<>();
         for (int i=routes.size()-1; i>=0; i--)
             items.add((Object)routes.get(i));
-        editModel = new EntityEditModel(items,EntityType.ROUTES);
+        editModel = new EntityEditModel(items,EntityEditModel.EntityType.ROUTES);
         this.resultTbl.setModel(editModel);
         resultTbl.setRowHeight(25);
     }
@@ -137,7 +140,7 @@ public class BranchEditPage extends JDialog {
         List<Object> items = new ArrayList<>();
         for (int i=roles.size()-1; i>=0; i--)
             items.add((Object)roles.get(i));
-        editModel = new EntityEditModel(items,EntityType.ROLES);
+        editModel = new EntityEditModel(items,EntityEditModel.EntityType.ROLES);
         this.resultTbl.setModel(editModel);
         resultTbl.setRowHeight(25);
     }
