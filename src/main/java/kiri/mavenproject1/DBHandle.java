@@ -206,13 +206,15 @@ public class DBHandle {
      * @param user 
      */
     public void addNewUser(User user) {
+        if (!manager.isOpen())
+            manager = managerFactory.createEntityManager();
         if (user.getRole()!=null &&user.getRole().getId()<=2)
             checkUserRights(1);
         if (user.getRole()==null) {
             Role role = this.getRoles().get(2);
             user.setRole(role);
         }
-        this.InsertEntity(user);
+        this.updateEntity(user);
     }
     public void updateUser(User toUpdate) {
         if (this.currentUser!=null && currentUser.getId()==toUpdate.getId()) {
@@ -347,6 +349,7 @@ public class DBHandle {
         try {
             manager.getTransaction().begin();
             manager.persist(e);
+            manager.flush();
             System.out.println("Inserted "+e.toString());
             manager.getTransaction().commit();
         }
