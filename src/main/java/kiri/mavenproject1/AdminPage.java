@@ -507,6 +507,8 @@ public class AdminPage extends JDialog {
     private void saveRouteStationsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveRouteStationsBtnActionPerformed
         try {
             this.handle.resetRouteStations(this.routeStationsPnl.getRouteStations());
+            this.routeStationsPnl.setDefaultRoute();
+            this.validate();
             Utils.showMessage(this, "Изменения сохранены","",false);
         } 
         catch (Throwable exc) {

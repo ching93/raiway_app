@@ -430,20 +430,17 @@ public class DBHandle {
      */
     public void addSchedules(Iterable<Object> schedules) {
         checkUserRights(2);
-        manager.getTransaction().begin();
         //List<Object> toUpdate = new ArrayList<>();
         try {
+            manager.getTransaction().begin();
             for (Object item: schedules) {
                 Schedule schedule = (Schedule)item;
-                // проверка на наличие других отправлений с тем же поездом с перекрывающейся датой
-                
-                schedule = manager.merge(schedule);
-                manager.flush();
+                TicketPerBranch tpb = new TicketPerBranch();
+                List<TicketPerBranch> tpbs = new ArrayList<>();
+                LocalDateTime d = schedule.getDepartureTime();
                 List<RouteStation> rs = this.getRouteStationsByRoute(schedule.getRoute());
                 if (rs.isEmpty())
                     throw new IllegalArgumentException("Маршрут пустой");
-                LocalDateTime d = schedule.getDepartureTime();
-                TicketPerBranch tpb = new TicketPerBranch();
                 for (int i=0; i<rs.size(); i++) {
                     RouteStation node = rs.get(i);
                     tpb = new TicketPerBranch();
@@ -453,8 +450,9 @@ public class DBHandle {
                     tpb.setArriveTime(d);
                     tpb.setTotalDistance(node.getTotalDistance());
                     d = d.plus(rs.get(i).getTimeToCome());
-                    manager.merge(tpb);
+                    tpbs.add(tpb);
                 }
+                // проверка на наличие других отправлений с тем же поездом с перекрывающейся датой
                 String arriveTimeSql = "select MAX(tpb.arriveTime) from TicketPerBranch tpb group by tpb.schedule.id having tpb.schedule.id=sh.id";
                 Query q = manager.createQuery("select sh from Schedule sh where sh.train.id=:train_id and sh.departureTime BETWEEN :depTime and :arrTime or ("+arriveTimeSql+") BETWEEN :depTime and :arrTime");
                 q.setParameter("train_id", schedule.getTrain().getId());
@@ -463,10 +461,18 @@ public class DBHandle {
                 List<Schedule> shs = q.getResultList();
                 if (!shs.isEmpty())
                     throw new IllegalArgumentException("Отправление пересекается с другим");
+                schedule = manager.merge(schedule);
                 manager.flush();
-                manager.getTransaction().commit();
+                for (TicketPerBranch tpb1: tpbs) {
+                    tpb1.setSchedule(schedule);
+                    manager.merge(tpb1);
+                }
+                
+                manager.flush();
             }
+        manager.getTransaction().commit();
         } catch (IllegalArgumentException exc) {
+            manager.getTransaction().rollback();
             throw exc;
         } catch (Throwable exc) {
             Utils.traceAllErrors(exc);
