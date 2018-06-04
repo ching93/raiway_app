@@ -257,9 +257,11 @@ public class AdminPage extends JDialog {
         this.routePanel.setLayout(new BoxLayout(routePanel,BoxLayout.Y_AXIS));
         this.nodesPanel.setLayout(new BoxLayout(nodesPanel,BoxLayout.Y_AXIS));
         this.loadRouteList();
-        routeStationsPnl = new RouteStationsPanel((Route)this.routeCombo.getSelectedItem(),handle.getRailwaySystem());
+        Route route = (Route)this.routeCombo.getSelectedItem();
+        routeStationsPnl = new RouteStationsPanel(route,handle.getRailwaySystem());
         this.nodesPanel.add(this.routeStationsPnl);
-        routeStationsPnl.setDefaultRoute();
+        if (route!=null)
+            routeStationsPnl.setDefaultRoute();
         if (handle.getUserRole().getId()!=1)
             this.userEditBtn.setEnabled(false);
         this.validate();
